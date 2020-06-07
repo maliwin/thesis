@@ -14,7 +14,7 @@ EPOCH_COUNT = 15
 FORCE_RETRAIN = False
 
 
-def untrained_model_pytorch():
+def get_untrained_model_pytorch():
     import torch.nn as nn
     import torch.nn.functional as F
 
@@ -66,6 +66,93 @@ def get_untrained_model_tf(input_shape=(32, 32, 3)):
         tf.keras.layers.Dense(10)
     ])
     return model
+
+
+def setup_imagenet_model(which='resnet50v2'):
+    from art.classifiers import TensorFlowV2Classifier
+    images = load_images('../data/personal_images', (224, 224))
+    images = images.astype(np.float64)
+
+    def _setup_resnetv2_50():
+        from tensorflow.keras.applications.resnet_v2 import ResNet50V2, preprocess_input, decode_predictions
+        model = ResNet50V2()
+        art_preprocessing = preprocessing_art_tuple('tf')
+        art_model = TensorFlowV2Classifier(model=model, loss_object=tf.losses.SparseCategoricalCrossentropy(),
+                                           nb_classes=1000, input_shape=(224, 224, 3), clip_values=(0, 255),
+                                           preprocessing=art_preprocessing)
+        preprocessed_images = preprocess_input(np.array(images))
+        return model, art_model, images, preprocessed_images, preprocess_input, decode_predictions
+
+    def _setup_mobilenetv2():
+        from tensorflow.keras.applications.mobilenet_v2 import MobileNetV2, preprocess_input, decode_predictions
+        model = MobileNetV2()
+        art_preprocessing = preprocessing_art_tuple('tf')
+        art_model = TensorFlowV2Classifier(model=model, loss_object=tf.losses.SparseCategoricalCrossentropy(),
+                                           nb_classes=1000, input_shape=(224, 224, 3), clip_values=(0, 255),
+                                           preprocessing=art_preprocessing)
+        preprocessed_images = preprocess_input(np.array(images))
+        return model, art_model, images, preprocessed_images, preprocess_input, decode_predictions
+
+    def _setup_densenet_121():
+        from tensorflow.keras.applications.densenet import DenseNet121, preprocess_input, decode_predictions
+        model = DenseNet121()
+        art_preprocessing = preprocessing_art_tuple('torch')
+        art_model = TensorFlowV2Classifier(model=model, loss_object=tf.losses.SparseCategoricalCrossentropy(),
+                                           nb_classes=1000, input_shape=(224, 224, 3), clip_values=(0, 255),
+                                           preprocessing=art_preprocessing)
+        preprocessed_images = preprocess_input(np.array(images))
+        return model, art_model, images, preprocessed_images, preprocess_input, decode_predictions
+
+    def _setup_vgg16():
+        from tensorflow.keras.applications.vgg16 import VGG16, preprocess_input, decode_predictions
+        # NB: VGG16 is BGR
+        # NB: preprocess_input converts RGB to BGR on its own ! ! !
+        #     however, art DOESN'T and we have to pass it a BGR image that has *not* been preprocessed
+        #     (because it does it on it's own too)
+
+        model = VGG16()
+        art_preprocessing = preprocessing_art_tuple('caffe')
+        art_model = TensorFlowV2Classifier(model=model, loss_object=tf.losses.SparseCategoricalCrossentropy(),
+                                           nb_classes=1000, input_shape=(224, 224, 3), clip_values=(0, 255),
+                                           preprocessing=art_preprocessing)
+        preprocessed_images = preprocess_input(np.array(images))  # these are now bgr !!!!!!!!!
+        return model, art_model, images, preprocessed_images, preprocess_input, decode_predictions
+
+    def _setup_vgg19():
+        from tensorflow.keras.applications.vgg19 import VGG19, preprocess_input, decode_predictions
+        # NB: VGG16 is BGR
+        # NB: preprocess_input converts RGB to BGR on its own ! ! !
+        #     however, art DOESN'T and we have to pass it a BGR image that has *not* been preprocessed
+        #     (because it does it on it's own too)
+
+        model = VGG19()
+        art_preprocessing = preprocessing_art_tuple('caffe')
+        art_model = TensorFlowV2Classifier(model=model, loss_object=tf.losses.SparseCategoricalCrossentropy(),
+                                           nb_classes=1000, input_shape=(224, 224, 3), clip_values=(0, 255),
+                                           preprocessing=art_preprocessing)
+        preprocessed_images = preprocess_input(np.array(images))  # these are now bgr !!!!!!!!!
+        return model, art_model, images, preprocessed_images, preprocess_input, decode_predictions
+
+    def _setup_xception_deprecated():
+        # deprecated because it's 299, it's easier to just do 224 on all of them
+        from tensorflow.keras.applications.xception import Xception, preprocess_input, decode_predictions
+        model = Xception()
+        art_model = TensorFlowV2Classifier(model=model, loss_object=tf.losses.SparseCategoricalCrossentropy(),
+                                           nb_classes=1000, input_shape=(299, 299, 3), clip_values=(0, 255),
+                                           preprocessing=(127.5, 127.5))
+        preprocessed_images = preprocess_input(np.array(images))
+        return model, art_model, images, preprocessed_images, preprocess_input, decode_predictions
+
+    lookup_setup = {
+        'resnet50v2': _setup_resnetv2_50,
+        'densenet121': _setup_densenet_121,
+        'vgg16': _setup_vgg16,
+        'vgg19': _setup_vgg19,
+        'mobilenetv2': _setup_mobilenetv2,
+        'xception': _setup_xception_deprecated
+    }
+
+    return lookup_setup[which]()
 
 
 def make_model_tf(epochs=EPOCH_COUNT, preload_attempt=True, save_on_preload_fail=True):

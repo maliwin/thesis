@@ -28,7 +28,7 @@ def train_pytorch():
     testset = torchvision.datasets.CIFAR10(root='./data', train=True, download=True, transform=transforms.ToTensor())
     testloader = torch.utils.data.DataLoader(testset, batch_size=32, shuffle=False, num_workers=4)
 
-    model = untrained_model_pytorch()
+    model = get_untrained_model_pytorch()
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.SGD(model.parameters(), lr=0.01)
 
@@ -87,7 +87,7 @@ def get_tf_model():
 
 def get_pytorch_model():
     import torch
-    net = untrained_model_pytorch()
+    net = get_untrained_model_pytorch()
     net.load_state_dict(torch.load('./transferability/pytorch.pth'))
     return net
 

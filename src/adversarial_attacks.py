@@ -25,97 +25,11 @@ logger.addHandler(handler)
 # HopSkipJump attack
 
 
-def setup(which='resnet50v2'):
-    images = load_images('../data/personal_images', (224, 224))
-    images = images.astype(np.float64)
-
-    def _setup_resnetv2_50():
-        from tensorflow.keras.applications.resnet_v2 import ResNet50V2, preprocess_input, decode_predictions
-        model = ResNet50V2()
-        art_preprocessing = preprocessing_art_tuple('tf')
-        art_model = TensorFlowV2Classifier(model=model, loss_object=tf.losses.SparseCategoricalCrossentropy(),
-                                           nb_classes=1000, input_shape=(224, 224, 3), clip_values=(0, 255),
-                                           preprocessing=art_preprocessing)
-        preprocessed_images = preprocess_input(np.array(images))
-        return model, art_model, images, preprocessed_images, preprocess_input, decode_predictions
-
-    def _setup_mobilenetv2():
-        from tensorflow.keras.applications.mobilenet_v2 import MobileNetV2, preprocess_input, decode_predictions
-        model = MobileNetV2()
-        art_preprocessing = preprocessing_art_tuple('tf')
-        art_model = TensorFlowV2Classifier(model=model, loss_object=tf.losses.SparseCategoricalCrossentropy(),
-                                           nb_classes=1000, input_shape=(224, 224, 3), clip_values=(0, 255),
-                                           preprocessing=art_preprocessing)
-        preprocessed_images = preprocess_input(np.array(images))
-        return model, art_model, images, preprocessed_images, preprocess_input, decode_predictions
-
-    def _setup_densenet_121():
-        from tensorflow.keras.applications.densenet import DenseNet121, preprocess_input, decode_predictions
-        model = DenseNet121()
-        art_preprocessing = preprocessing_art_tuple('torch')
-        art_model = TensorFlowV2Classifier(model=model, loss_object=tf.losses.SparseCategoricalCrossentropy(),
-                                           nb_classes=1000, input_shape=(224, 224, 3), clip_values=(0, 255),
-                                           preprocessing=art_preprocessing)
-        preprocessed_images = preprocess_input(np.array(images))
-        return model, art_model, images, preprocessed_images, preprocess_input, decode_predictions
-
-    def _setup_vgg16():
-        from tensorflow.keras.applications.vgg16 import VGG16, preprocess_input, decode_predictions
-        # NB: VGG16 is BGR
-        # NB: preprocess_input converts RGB to BGR on its own ! ! !
-        #     however, art DOESN'T and we have to pass it a BGR image that has *not* been preprocessed
-        #     (because it does it on it's own too)
-
-        model = VGG16()
-        art_preprocessing = preprocessing_art_tuple('caffe')
-        art_model = TensorFlowV2Classifier(model=model, loss_object=tf.losses.SparseCategoricalCrossentropy(),
-                                           nb_classes=1000, input_shape=(224, 224, 3), clip_values=(0, 255),
-                                           preprocessing=art_preprocessing)
-        preprocessed_images = preprocess_input(np.array(images))  # these are now bgr !!!!!!!!!
-        return model, art_model, images, preprocessed_images, preprocess_input, decode_predictions
-
-    def _setup_vgg19():
-        from tensorflow.keras.applications.vgg19 import VGG19, preprocess_input, decode_predictions
-        # NB: VGG16 is BGR
-        # NB: preprocess_input converts RGB to BGR on its own ! ! !
-        #     however, art DOESN'T and we have to pass it a BGR image that has *not* been preprocessed
-        #     (because it does it on it's own too)
-
-        model = VGG19()
-        art_preprocessing = preprocessing_art_tuple('caffe')
-        art_model = TensorFlowV2Classifier(model=model, loss_object=tf.losses.SparseCategoricalCrossentropy(),
-                                           nb_classes=1000, input_shape=(224, 224, 3), clip_values=(0, 255),
-                                           preprocessing=art_preprocessing)
-        preprocessed_images = preprocess_input(np.array(images))  # these are now bgr !!!!!!!!!
-        return model, art_model, images, preprocessed_images, preprocess_input, decode_predictions
-
-    def _setup_xception_deprecated():
-        # deprecated because it's 299, it's easier to just do 224 on all of them
-        from tensorflow.keras.applications.xception import Xception, preprocess_input, decode_predictions
-        model = Xception()
-        art_model = TensorFlowV2Classifier(model=model, loss_object=tf.losses.SparseCategoricalCrossentropy(),
-                                           nb_classes=1000, input_shape=(299, 299, 3), clip_values=(0, 255),
-                                           preprocessing=(127.5, 127.5))
-        preprocessed_images = preprocess_input(np.array(images))
-        return model, art_model, images, preprocessed_images, preprocess_input, decode_predictions
-
-    lookup_setup = {
-        'resnet50v2': _setup_resnetv2_50,
-        'densenet121': _setup_densenet_121,
-        'vgg16': _setup_vgg16,
-        'vgg19': _setup_vgg19,
-        'mobilenetv2': _setup_mobilenetv2,
-        'xception': _setup_xception_deprecated
-    }
-
-    return lookup_setup[which]()
-
-
 def fgsm():
     # FGSM: norms - 1, 2, inf
     from art.attacks.evasion import FastGradientMethod
     # NB: np.inf is FGSM
-    model, art_model, images, preprocessed_images, preprocess_input, decode_predictions = setup()
+    model, art_model, images, preprocessed_images, preprocess_input, decode_predictions = setup_imagenet_model()
 
     # NB: epsilon depends on input, i.e. if images are [0, 1] then eps should be of the same order of magnitude
     #     if images are [0, 255], then eps has to be on that order of magnitude
@@ -137,7 +51,7 @@ def fgsm():
 
 def jsma():
     from art.attacks.evasion import SaliencyMapMethod
-    model, art_model, images, preprocessed_images, preprocess_input, decode_predictions = setup()
+    model, art_model, images, preprocessed_images, preprocess_input, decode_predictions = setup_imagenet_model()
 
     attack = SaliencyMapMethod(art_model)
     adversarial_images = attack.generate(np.array([images[0]]))
@@ -147,7 +61,7 @@ def jsma():
 
 def pgd():
     from art.attacks.evasion import ProjectedGradientDescent
-    model, art_model, images, preprocessed_images, preprocess_input, decode_predictions = setup()
+    model, art_model, images, preprocessed_images, preprocess_input, decode_predictions = setup_imagenet_model()
 
     attack = ProjectedGradientDescent(art_model, max_iter=10)
     adversarial_images = attack.generate(images)
@@ -157,7 +71,7 @@ def pgd():
 
 def cw():
     from art.attacks.evasion import CarliniL2Method, CarliniLInfMethod
-    model, art_model, images, preprocessed_images, preprocess_input, decode_predictions = setup()
+    model, art_model, images, preprocessed_images, preprocess_input, decode_predictions = setup_imagenet_model()
 
     # attack1 = CarliniL2Method(art_model, max_iter=30)
     # adversarial_images1 = attack1.generate(np.array([images[0]]))
@@ -176,7 +90,7 @@ def boundary_attack(init_image_idxs=None, target_image_idxs=None,
                     callback=None):
     import time
     from art.attacks.evasion import BoundaryAttack
-    model, art_model, images, preprocessed_images, preprocess_input, decode_predictions = setup(which_model)
+    model, art_model, images, preprocessed_images, preprocess_input, decode_predictions = setup_imagenet_model(which_model)
 
     if init_image_idxs or target_image_idxs:
         assert len(init_image_idxs) == len(target_image_idxs)
