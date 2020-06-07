@@ -1,0 +1,94 @@
+\documentclass[utf8, diplomski]{fer}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{ltablex}
+\usepackage{pdfpages}
+\usepackage{hyperref}
+\usepackage{mathtools}
+\usepackage{listings}
+\setcitestyle{numbers,square,super}
+\usepackage[export]{adjustbox}
+\usepackage{float}
+
+
+\begin{document}
+
+\thesisnumber{2231}
+
+\title{Obrana dubokih konvolucijskih modela od neprijateljskih primjera}
+
+\author{Matej Dobrovodski}
+
+\maketitle
+
+\iffalse \includepdf[pages=-]{img/content/izvornik.pdf} \fi
+
+\tableofcontents
+
+\chapter{Uvod}
+\section{Raspoznavanje objekata}
+Raspoznavanje objekata jedan je od ključnih problema područja računalnog vida. Pri rješavanju problema raspoznavanja objekata se na ulaz nekog sustava dovede slika nekog objekta, a na izlazu se očekuje ispravna klasifikacija u neki od predodređenih razreda. Čovjeku ovaj zadatak ne predstavlja veliki problem, no još uvijek ne postoji zadovoljavajuće rješenje problema koje bi vrijedilo za opći slučaj. Trenutno najbolja takva rješenja temelje se na konvolucijskim neuronskim mrežama. \par
+Razvoj konvolucijskih mreža počeo je osamdesetih godina prošlog stoljeća. Počelo je razvojem \textit{neocognitron}[citat?]-a--neuronske mreže inspirirane biološkim stanicama vidne kore mozga. Krajem devedesetih godina se pojavljuje konvolucijska neuronska mreža LeNet5. LeNet5 mreža je vrlo uspješno raspoznavala rukom pisane znamenke te je ova mreža bila početna točka za daljnja istraživanja drugih neuronskih mreža. [citati] \par
+\textit{ImageNet}[citat] projekt je velika baza podataka predviđena za istraživanje područja raspoznavanja objekata. S više od $14$ milijuna slika podijeljenih u $20000$ kategorija, \textit{ImageNet} skup je daleko najveći slobodno dostupni skup. Počevši od 2010.[?] godine, \textit{ImageNet} projekt organizira godišnje natjecanje, \textit{ImageNet Large Scale Visual Recognition Challenge} (ILSVRC). Veliki skok u točnosti pri raspoznavanju dogodio se 2012. godine kada je konvolucijska neuronska mreža \textit{AlexNet}[citat] postigla top-5 pogrešku od samo $15.3\%$, što je bilo $10.8\%$ manje od sljedeće mreže. To je postignuto korištenjem grafičkih procesora pri treniranju, što je potaknulo svojevrsnu revoluciju u području dubokog učenja. \par
+Do 2017. godine, većina timova u natjecanju je imala top-5 točnost veću od $95\%$. Danas se u raznim bibliotekama mogu naći neke od tih mreža, te će se one spominjati i koristiti u nastavku rada. Neke od njih su \textit{Xception}[citat], \textit{VGG}[citat], \textit{ResNet}[citat], \textit{DenseNet}[citat]. Sve te mreže postižu vrlo zadovoljavajuću točnosti i čini se da mogu dobro generalizirati. No u nastavku rada će biti pokazan oblik napada na konvolucijske mreže koji osporava činjenicu da današnje konvolucijske mreže dobro generaliziraju.
+\section{Neprijateljski primjeri i obrana}
+Krajem $2013.$ godine pojavljuje se prvi izravni napad na duboke neuronske mreže. Polazna pretpostavka je da duboki modeli imaju svojevrsne \textit{slijepu pjege}. \\
+Uobičajeno vrijedi da za neki ispravno klasificirani ulaz $x$ postoji područje u blizini ulaza $x$, $x + r$, gdje je $||r|| < \epsilon$ za neki dovoljno mali radijus $\epsilon > 0$. Modeli ulazne vrijednosti iz tog područja također ispravno klasificiraju, kao i $x$. Općenito, neprimjetne perturbacije neke slike $x$ ne mijenjaju izlaz modela. Ono što napad iz [citat] pokazuje je to da navedena pretpostavka često ne vrijedi kod dubokih modela i da je moguće konstruirati ulaze $x + r$  Taj napad izravno koristi podatke iz mreže, stoga se smatra \textit{white-box} napadom. 
+
+što su suparnički primjeri [seminar]\\
+primjeri \\
+primjena \\
+što je obrana \\
+važnost, relevantnost obrane \\
+
+\chapter{Neprijateljski primjeri}
+threat model (false positive, false negative, white/black box), targeted/non targeted, attack frequency (one-time, iterative) \\
+"povijest" neprijateljskih primjera \\
+vrste, kratko o njima i na koje se ja fokusiram \\
+matematička definicija ? \\
+žešće obraditi par obitelji napada (neke starije, neke robusnije) \\
+napadi: LBFGS 2014, FG(S)M https://arxiv.org/abs/1412.6572 (rand-fgsm?), JSMA, DeepFool, CW, Pixel Attack, Boundary attack, HopSkipJump attack \\
+pokazati kako funkcioniraju na hrpi primjera
+
+\chapter{Obrana dubokih konvolucijskih modela}
+opisati vrste obrane \\
+pristupi jednostavnijih obrana \\
+problemi \\
+trenutno stanje obrana \\
+provable defense \\
+budućnost obrana 
+
+\chapter{Rezultati}
+\section{Programska potpora}
+odabir tehnologije - navesti 3 biblioteke, CUDA, python, whatever the fuck \\
+foolbox - čiji je, neki napadi, pros, cons, kratki pseudokod \\
+cleverhans - same \\
+art - same \\
+\section{Primjeri pojedinih napada}
+@
+\section{Pregled učinkovitosti obrana}
+@
+
+\chapter{Zaključak}
+Konvolucijske neuronske mreže su se pokazale iznimno uspješnima pri rješavanju problema klasifikacije objekata. Međutim, pojava neprijateljskih primjera postavlja 
+
+future work!!!!!! \\
+NOTE stvari potrebne znati inside out: feedforward mreža, CNN, sve što se spominje na random (Adam)
+
+\bibliography{literatura}
+\bibliographystyle{fer}
+
+\begin{sazetak}
+Današnji konvolucijski modeli postižu visoku točnost u području raspoznavanja objekata. Način rada dubokih modela je još uvijek vrlo teško ili nemoguće interpretirati, a dodatan razlog za brigu predstavljaju i nedavno otkriveni neprijateljski primjeri. Neprijateljski primjeri su slike s dodatnim teško uočljivim perturbacijama koje potiču model na pogrešnu klasifikaciju. Pokazalo se da je vrlo lagano konstruirati brze i efikasne napade na postojeće modele, međutim  ubrzo su se pojavile i obrane protiv takvih napada. Ti početni napadi su se oslanjali na pristup mreži i poznavanju arhitekture, a obrane od takvih napada se temelje na "prikrivanju" potrebnih informacija, kao što su gradijenti.
+
+\kljucnerijeci{duboko učenje, klasifikacija, konvolucijske neuronske mreže, računalni vid, suparnički primjeri, neprijateljski primjeri, obrana.}
+\end{sazetak}
+
+\engtitle{Defending Deep Convolutional Models from Adversarial Examples}
+\begin{abstract}
+Deep neural networks can achieve very high accuracy in many applications such as image classification. However, most of these deep models are difficult to interpret and they are often sensitive to the so-called adversarial examples. This feature opens up the possibility of maliciously designing adversarial examples that could deceive a deep learning system. 
+
+\keywords{deep learning, classification, convolutional neural networks, computer vision, adversarial attacks, defense.}
+\end{abstract}
+
+\end{document}
