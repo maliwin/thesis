@@ -14,6 +14,15 @@ EPOCH_COUNT = 15
 FORCE_RETRAIN = False
 
 
+import logging
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
+handler = logging.StreamHandler()
+formatter = logging.Formatter("[%(levelname)s] %(message)s")
+handler.setFormatter(formatter)
+logger.addHandler(handler)
+
+
 def get_untrained_model_pytorch():
     import torch.nn as nn
     import torch.nn.functional as F
@@ -288,6 +297,71 @@ def preload_tensorflow():
     print('loaded tf')
 
 
+def power_spectrum(image):
+    from scipy import fftpack
+    r, g, b = image[..., 0], image[..., 1], image[..., 2]
+
+    p_spectrums = []
+    p_avgs = []
+    for color_channel in (r, g, b):
+        f1 = fftpack.fft2(color_channel)
+        f2 = fftpack.fftshift(f1)
+        p_spectrum = np.abs(f2) ** 2
+        p_avg = azimuthal_avg(p_spectrum)
+        p_avgs.append(p_avg)
+        p_spectrums.append(p_spectrum)
+
+    t = [azimuthal_avg(np.log(z + 1e-8) / 26) for z in p_spectrums]
+    return t
+
+
+def azimuthal_avg(img):
+    x, y = np.meshgrid(np.arange(img.shape[1]), np.arange(img.shape[0]))
+    r = np.sqrt((x - 112) ** 2 + (y - 112) ** 2)
+    calc_mean = lambda some_r: img[(r >= some_r - 0.5) & (r < some_r + 0.5)].mean()
+    radii = np.linspace(1, 112, num=112)  # hardcoded I guess
+    azimuthal = np.vectorize(calc_mean)(radii)  # vectorized makes it speedy
+    return azimuthal
+
+
 if __name__ == '__main__':
-    save_numpy_arrays(np.array([1, 2, 3]), 'test')
-    t = load_numpy_array('test')
+    preload_tensorflow()
+    images = load_images('../data/personal_images', (224, 224))[1:]
+    images = images.astype(np.float32)
+
+    all_pwrs = []
+    for img in images:
+        pwrs = power_spectrum(img)
+        pwr = np.sum(pwrs, axis=0) / 3
+        all_pwrs.append(pwr)
+    all_pwrs = np.sum(np.array(all_pwrs), axis=0) / len(images)
+
+    all_pwrs_noisy = []
+    noisy_images = []
+    for img in images:
+        img_noisy = img + (np.random.random((224, 224, 3)) - 0.5) * 0.011113533
+        img_noisy = np.clip(img_noisy, 0, 255)
+        noisy_images.append(img_noisy)
+        pwrs = power_spectrum(img_noisy)
+        pwr = np.sum(pwrs, axis=0) / 3
+        all_pwrs_noisy.append(pwr)
+    all_pwrs_noisy = np.sum(np.array(all_pwrs_noisy), axis=0) / len(images)
+
+    from art.attacks.evasion import FastGradientMethod
+    model, art_model, _images, preprocessed_images, preprocess_input, decode_predictions = setup_imagenet_model()
+
+    norms = [np.inf, 1, 2]
+    epsilons = [0.5, 1, 2, 5, 10, 20]
+    attack = FastGradientMethod(art_model, eps=80, minimal=True)
+    adversarial_images = attack.generate(images)
+    adversarial_predictions = decode_predictions(art_model.predict(adversarial_images))
+    a = 5
+
+    all_pwrs_adv = []
+    for img in adversarial_images:
+        pwrs = power_spectrum(img)
+        pwr = np.sum(pwrs, axis=0) / 3
+        all_pwrs_adv.append(pwr)
+    all_pwrs_adv = np.sum(np.array(all_pwrs_adv), axis=0) / len(images)
+
+    z = 0
