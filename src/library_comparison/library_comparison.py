@@ -12,7 +12,7 @@ def foolbox_example():
     from foolbox.attacks import FGSM
 
     def _foolbox_example_tf():
-        model, probability_model, (x_train, y_train), (x_test, y_test) = make_model_tf()
+        model, probability_model, (x_train, y_train), (x_test, y_test) = setup_cifar10_model()
 
         # NB: "The size of the perturbations should be at most epsilon, but this
         #     is not guaranteed and the caller should verify this or clip the result"
@@ -50,7 +50,7 @@ def cleverhans_example():
     from cleverhans.future.tf2.attacks import fast_gradient_method
 
     def _cleverhans_example_tf():
-        model, probability_model, (x_train, y_train), (x_test, y_test) = make_model_tf()
+        model, probability_model, (x_train, y_train), (x_test, y_test) = setup_cifar10_model()
 
         t1 = time.time()
         adversarial = fast_gradient_method(model, x_test[:4], 0.01, np.inf)
@@ -75,7 +75,7 @@ def art_example():
     from art.classifiers import TensorFlowV2Classifier
 
     def _art_example_tf():
-        model, probability_model, (x_train, y_train), (x_test, y_test) = make_model_tf()
+        model, probability_model, (x_train, y_train), (x_test, y_test) = setup_cifar10_model()
 
         t1 = time.time()
         model_art = TensorFlowV2Classifier(model=probability_model, loss_object=model.loss,

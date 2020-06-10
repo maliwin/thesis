@@ -14,15 +14,6 @@ EPOCH_COUNT = 15
 FORCE_RETRAIN = False
 
 
-import logging
-logger = logging.getLogger()
-logger.setLevel(logging.INFO)
-handler = logging.StreamHandler()
-formatter = logging.Formatter("[%(levelname)s] %(message)s")
-handler.setFormatter(formatter)
-logger.addHandler(handler)
-
-
 def get_untrained_model_pytorch():
     import torch.nn as nn
     import torch.nn.functional as F
@@ -74,10 +65,12 @@ def get_untrained_model_tf(input_shape=(32, 32, 3)):
         tf.keras.layers.Dropout(0.50),
         tf.keras.layers.Dense(10)
     ])
-    return model
+
+    probability_model = tf.keras.Sequential([model, tf.keras.layers.Softmax()])
+    return model, probability_model
 
 
-def setup_imagenet_model(which='resnet50v2'):
+def setup_imagenet_model(which='resnet50v2', preprocessing_defences=None, postprocessing_defences=None):
     from art.classifiers import TensorFlowV2Classifier
     images = load_images('../data/personal_images', (224, 224))
     images = images.astype(np.float64)
@@ -86,31 +79,19 @@ def setup_imagenet_model(which='resnet50v2'):
         from tensorflow.keras.applications.resnet_v2 import ResNet50V2, preprocess_input, decode_predictions
         model = ResNet50V2()
         art_preprocessing = preprocessing_art_tuple('tf')
-        art_model = TensorFlowV2Classifier(model=model, loss_object=tf.losses.SparseCategoricalCrossentropy(),
-                                           nb_classes=1000, input_shape=(224, 224, 3), clip_values=(0, 255),
-                                           preprocessing=art_preprocessing)
-        preprocessed_images = preprocess_input(np.array(images))
-        return model, art_model, images, preprocessed_images, preprocess_input, decode_predictions
+        return model, art_preprocessing, preprocess_input, decode_predictions
 
     def _setup_mobilenetv2():
         from tensorflow.keras.applications.mobilenet_v2 import MobileNetV2, preprocess_input, decode_predictions
         model = MobileNetV2()
         art_preprocessing = preprocessing_art_tuple('tf')
-        art_model = TensorFlowV2Classifier(model=model, loss_object=tf.losses.SparseCategoricalCrossentropy(),
-                                           nb_classes=1000, input_shape=(224, 224, 3), clip_values=(0, 255),
-                                           preprocessing=art_preprocessing)
-        preprocessed_images = preprocess_input(np.array(images))
-        return model, art_model, images, preprocessed_images, preprocess_input, decode_predictions
+        return model, art_preprocessing, preprocess_input, decode_predictions
 
     def _setup_densenet_121():
         from tensorflow.keras.applications.densenet import DenseNet121, preprocess_input, decode_predictions
         model = DenseNet121()
         art_preprocessing = preprocessing_art_tuple('torch')
-        art_model = TensorFlowV2Classifier(model=model, loss_object=tf.losses.SparseCategoricalCrossentropy(),
-                                           nb_classes=1000, input_shape=(224, 224, 3), clip_values=(0, 255),
-                                           preprocessing=art_preprocessing)
-        preprocessed_images = preprocess_input(np.array(images))
-        return model, art_model, images, preprocessed_images, preprocess_input, decode_predictions
+        return model, art_preprocessing, preprocess_input, decode_predictions
 
     def _setup_vgg16():
         from tensorflow.keras.applications.vgg16 import VGG16, preprocess_input, decode_predictions
@@ -118,39 +99,26 @@ def setup_imagenet_model(which='resnet50v2'):
         # NB: preprocess_input converts RGB to BGR on its own ! ! !
         #     however, art DOESN'T and we have to pass it a BGR image that has *not* been preprocessed
         #     (because it does it on it's own too)
-
         model = VGG16()
         art_preprocessing = preprocessing_art_tuple('caffe')
-        art_model = TensorFlowV2Classifier(model=model, loss_object=tf.losses.SparseCategoricalCrossentropy(),
-                                           nb_classes=1000, input_shape=(224, 224, 3), clip_values=(0, 255),
-                                           preprocessing=art_preprocessing)
-        preprocessed_images = preprocess_input(np.array(images))  # these are now bgr !!!!!!!!!
-        return model, art_model, images, preprocessed_images, preprocess_input, decode_predictions
+        return model, art_preprocessing, preprocess_input, decode_predictions
 
     def _setup_vgg19():
         from tensorflow.keras.applications.vgg19 import VGG19, preprocess_input, decode_predictions
-        # NB: VGG16 is BGR
+        # NB: VGG19 is BGR
         # NB: preprocess_input converts RGB to BGR on its own ! ! !
         #     however, art DOESN'T and we have to pass it a BGR image that has *not* been preprocessed
         #     (because it does it on it's own too)
-
         model = VGG19()
         art_preprocessing = preprocessing_art_tuple('caffe')
-        art_model = TensorFlowV2Classifier(model=model, loss_object=tf.losses.SparseCategoricalCrossentropy(),
-                                           nb_classes=1000, input_shape=(224, 224, 3), clip_values=(0, 255),
-                                           preprocessing=art_preprocessing)
-        preprocessed_images = preprocess_input(np.array(images))  # these are now bgr !!!!!!!!!
-        return model, art_model, images, preprocessed_images, preprocess_input, decode_predictions
+        return model, art_preprocessing, preprocess_input, decode_predictions
 
     def _setup_xception_deprecated():
         # deprecated because it's 299, it's easier to just do 224 on all of them
         from tensorflow.keras.applications.xception import Xception, preprocess_input, decode_predictions
         model = Xception()
-        art_model = TensorFlowV2Classifier(model=model, loss_object=tf.losses.SparseCategoricalCrossentropy(),
-                                           nb_classes=1000, input_shape=(299, 299, 3), clip_values=(0, 255),
-                                           preprocessing=(127.5, 127.5))
-        preprocessed_images = preprocess_input(np.array(images))
-        return model, art_model, images, preprocessed_images, preprocess_input, decode_predictions
+        art_preprocessing = (127.5, 127.5)
+        return model, art_preprocessing, preprocess_input, decode_predictions
 
     lookup_setup = {
         'resnet50v2': _setup_resnetv2_50,
@@ -161,15 +129,27 @@ def setup_imagenet_model(which='resnet50v2'):
         'xception': _setup_xception_deprecated
     }
 
-    return lookup_setup[which]()
+    model, art_preprocessing, preprocess_input, decode_predictions = lookup_setup[which]()
+
+    # NB: if we want to go back to 0-255, just remove this stuff and clip values
+    images = images / 255
+    art_preprocessing = art_preprocessing[0] / 255, art_preprocessing[1] / 255
+
+    art_model = TensorFlowV2Classifier(model=model, loss_object=tf.losses.SparseCategoricalCrossentropy(),
+                                       nb_classes=1000, input_shape=(224, 224, 3), clip_values=(0, 1),
+                                       preprocessing=art_preprocessing,
+                                       preprocessing_defences=preprocessing_defences,
+                                       postprocessing_defences=postprocessing_defences)
+    preprocessed_images = preprocess_input(np.array(images))
+    return model, art_model, images, preprocessed_images, preprocess_input, decode_predictions
 
 
-def make_model_tf(epochs=EPOCH_COUNT, preload_attempt=True, save_on_preload_fail=True):
+def setup_cifar10_model(epochs=EPOCH_COUNT, preload_attempt=True, save_on_preload_fail=True):
     (x_train, y_train), (x_test, y_test) = tf.keras.datasets.cifar10.load_data()
     x_train, x_test = x_train / 255, x_test / 255  # (0, 1) range
 
     def _train_new_model():
-        model = get_untrained_model_tf()
+        model, _ = get_untrained_model_tf()
         model.compile(optimizer='adam',
                       loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
                       metrics=['accuracy'])
@@ -324,44 +304,55 @@ def azimuthal_avg(img):
     return azimuthal
 
 
+def setup_logging():
+    import logging
+    logger = logging.getLogger()
+    logger.setLevel(logging.INFO)
+    handler = logging.StreamHandler()
+    formatter = logging.Formatter("[%(levelname)s] %(message)s")
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
+
+
 if __name__ == '__main__':
-    preload_tensorflow()
-    images = load_images('../data/personal_images', (224, 224))[1:]
-    images = images.astype(np.float32)
-
-    all_pwrs = []
-    for img in images:
-        pwrs = power_spectrum(img)
-        pwr = np.sum(pwrs, axis=0) / 3
-        all_pwrs.append(pwr)
-    all_pwrs = np.sum(np.array(all_pwrs), axis=0) / len(images)
-
-    all_pwrs_noisy = []
-    noisy_images = []
-    for img in images:
-        img_noisy = img + (np.random.random((224, 224, 3)) - 0.5) * 0.011113533
-        img_noisy = np.clip(img_noisy, 0, 255)
-        noisy_images.append(img_noisy)
-        pwrs = power_spectrum(img_noisy)
-        pwr = np.sum(pwrs, axis=0) / 3
-        all_pwrs_noisy.append(pwr)
-    all_pwrs_noisy = np.sum(np.array(all_pwrs_noisy), axis=0) / len(images)
-
-    from art.attacks.evasion import FastGradientMethod
-    model, art_model, _images, preprocessed_images, preprocess_input, decode_predictions = setup_imagenet_model()
-
-    norms = [np.inf, 1, 2]
-    epsilons = [0.5, 1, 2, 5, 10, 20]
-    attack = FastGradientMethod(art_model, eps=80, minimal=True)
-    adversarial_images = attack.generate(images)
-    adversarial_predictions = decode_predictions(art_model.predict(adversarial_images))
-    a = 5
-
-    all_pwrs_adv = []
-    for img in adversarial_images:
-        pwrs = power_spectrum(img)
-        pwr = np.sum(pwrs, axis=0) / 3
-        all_pwrs_adv.append(pwr)
-    all_pwrs_adv = np.sum(np.array(all_pwrs_adv), axis=0) / len(images)
-
-    z = 0
+    setup_cifar10_model(69)
+    # preload_tensorflow()
+    # images = load_images('../data/personal_images', (224, 224))[1:]
+    # images = images.astype(np.float32)
+    #
+    # all_pwrs = []
+    # for img in images:
+    #     pwrs = power_spectrum(img)
+    #     pwr = np.sum(pwrs, axis=0) / 3
+    #     all_pwrs.append(pwr)
+    # all_pwrs = np.sum(np.array(all_pwrs), axis=0) / len(images)
+    #
+    # all_pwrs_noisy = []
+    # noisy_images = []
+    # for img in images:
+    #     img_noisy = img + (np.random.random((224, 224, 3)) - 0.5) * 0.011113533
+    #     img_noisy = np.clip(img_noisy, 0, 255)
+    #     noisy_images.append(img_noisy)
+    #     pwrs = power_spectrum(img_noisy)
+    #     pwr = np.sum(pwrs, axis=0) / 3
+    #     all_pwrs_noisy.append(pwr)
+    # all_pwrs_noisy = np.sum(np.array(all_pwrs_noisy), axis=0) / len(images)
+    #
+    # from art.attacks.evasion import FastGradientMethod
+    # model, art_model, _images, preprocessed_images, preprocess_input, decode_predictions = setup_imagenet_model()
+    #
+    # norms = [np.inf, 1, 2]
+    # epsilons = [0.5, 1, 2, 5, 10, 20]
+    # attack = FastGradientMethod(art_model, eps=80, minimal=True)
+    # adversarial_images = attack.generate(images)
+    # adversarial_predictions = decode_predictions(art_model.predict(adversarial_images))
+    # a = 5
+    #
+    # all_pwrs_adv = []
+    # for img in adversarial_images:
+    #     pwrs = power_spectrum(img)
+    #     pwr = np.sum(pwrs, axis=0) / 3
+    #     all_pwrs_adv.append(pwr)
+    # all_pwrs_adv = np.sum(np.array(all_pwrs_adv), axis=0) / len(images)
+    #
+    # z = 0

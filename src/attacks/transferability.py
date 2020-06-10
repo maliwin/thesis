@@ -1,14 +1,7 @@
 from util import *
 # preload_tensorflow()
 
-import logging
-logger = logging.getLogger()
-logger.setLevel(logging.INFO)
-handler = logging.StreamHandler()
-formatter = logging.Formatter("[%(levelname)s] %(message)s")
-handler.setFormatter(formatter)
-logger.addHandler(handler)
-
+setup_logging()
 
 def train_pytorch():
     import torchvision
@@ -71,7 +64,7 @@ def train_tf():
     preload_tensorflow()
     import tensorflow as tf
 
-    model = get_untrained_model_tf()
+    model, _ = get_untrained_model_tf()
     model.compile(optimizer=tf.keras.optimizers.SGD(learning_rate=0.01, momentum=0.0),
                   loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
                   metrics=['accuracy'])

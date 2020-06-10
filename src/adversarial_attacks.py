@@ -7,13 +7,7 @@ import tensorflow as tf
 from art.classifiers import TensorFlowV2Classifier
 from art.utils import to_categorical
 
-import logging
-logger = logging.getLogger()
-logger.setLevel(logging.INFO)
-handler = logging.StreamHandler()
-formatter = logging.Formatter("[%(levelname)s] %(message)s")
-handler.setFormatter(formatter)
-logger.addHandler(handler)
+setup_logging()
 
 # napadi:
 # FG(S)M https://arxiv.org/abs/1412.6572 (rand-fgsm?)
@@ -141,10 +135,63 @@ def boundary_attack(init_image_idxs=None, target_image_idxs=None,
     return np.array(x_advs), np.array(predictions)
 
 
+def deepfool():
+    from art.attacks.evasion import DeepFool
+    model, art_model, images, preprocessed_images, preprocess_input, decode_predictions = setup_imagenet_model()
+
+    attack = DeepFool(art_model, epsilon=0.01)
+    adversarial_images = attack.generate(images[:1])
+    adversarial_predictions = decode_predictions(art_model.predict(adversarial_images))
+    orig_predictions = decode_predictions(model.predict(preprocessed_images))
+
+
+def deepfool_cifar10():
+    from art.attacks.evasion import DeepFool
+    from art.defences.preprocessor import ThermometerEncoding
+
+    model1, probability_model1, (x_train, y_train), (x_test, y_test) = setup_cifar10_model(epochs=5)
+    x_train, x_test = x_train.astype(np.float32), x_test.astype(np.float32)
+
+    art_model1 = TensorFlowV2Classifier(model1, nb_classes=10, input_shape=(32, 32, 3), clip_values=(0, 1),
+                                       loss_object=model1.loss)
+    attack = DeepFool(art_model1)
+    adversarial_images = attack.generate(x_test[:10])
+
+    # # # #
+
+    model2, probability_model2 = get_untrained_model_tf((32, 32, 15))
+
+    loss_object = tf.keras.losses.CategoricalCrossentropy(from_logits=True)
+    optimizer = tf.keras.optimizers.Adam()
+
+    @tf.function
+    def train_step(model, images, labels):
+        with tf.GradientTape() as tape:
+            predictions = model(images, training=True)
+            loss = loss_object(labels, predictions)
+        gradients = tape.gradient(loss, model.trainable_variables)
+        optimizer.apply_gradients(zip(gradients, model.trainable_variables))
+
+    defence = ThermometerEncoding(clip_values=(0, 1), num_space=5)
+    art_model2 = TensorFlowV2Classifier(model2, nb_classes=10, input_shape=(32, 32, 3), clip_values=(0, 1),
+                                       preprocessing_defences=defence, train_step=train_step,
+                                       loss_object=loss_object)
+
+    import time
+    t1 = time.time()
+    art_model2.fit(x_train[:3000], to_categorical(y_train[:3000], 10), nb_epochs=3)
+    t2 = time.time()
+    print('time %f' % (t2 - t1))
+    attack2 = DeepFool(art_model2)
+    adversarial_images2 = attack.generate(x_test[:10])
+    a = 5
+
+
 if __name__ == '__main__':
     # fgsm()
     # jsma()
     # deepfool()
-    pgd()
+    # pgd()
+    deepfool_cifar10()
     # cw()
     # boundary_attack(which_model='densenet121')
