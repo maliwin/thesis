@@ -54,15 +54,14 @@ def display_boundary_results():
         pass
 
     def _multi_image_targeted_boundary_attack():
-        name = 'resnet50v2_boundary_targeted-multi-image'
+        name = 'resnet50v2_boundary_targeted-multi-image-long'
         loaded = load_numpy_array(name)
         loaded = loaded / 255
-        first, second = loaded[:10], loaded[10:]
+        first, second = loaded[1:11], loaded[11:]
         first = first.reshape(30, 224, 224, 3)
         second = second.reshape(30, 224, 224, 3)
         display_images(first, (10, 3))
         display_images(second, (10, 3))
-        a = 5
 
     def _single_image_untargeted_boundary_attack():
         pass
@@ -72,5 +71,5 @@ def display_boundary_results():
 
 
 if __name__ == '__main__':
-    generate_boundary_results()
-    # display_boundary_results()
+    # generate_boundary_results()
+    display_boundary_results()

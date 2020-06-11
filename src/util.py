@@ -327,9 +327,6 @@ def load_numpy_array(name, directory='results'):
 
 def preload_tensorflow():
     # nobody should ever ask me what this does. ever.
-    # x1 = tf.random.normal((1,))
-    # x2 = tf.random.normal((1,))
-    # y = tf.keras.layers.Conv2D()([x1, x2])
     import tensorflow as tf
     input_shape = (4, 28, 28, 3)
     x = tf.random.normal(input_shape)
