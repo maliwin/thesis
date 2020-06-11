@@ -103,7 +103,7 @@ def transferability():
         attack_set = x_test[:25].swapaxes(1, 3).astype(np.float32)
         x_adv = attack.generate(attack_set)
         x_adv = x_adv.swapaxes(1, 3)
-        save_numpy_arrays(x_adv, 'x_adv', './transferability')
+        save_numpy_array(x_adv, 'x_adv', './transferability')
 
     # m = get_pytorch_model()
     # m(torch.from_numpy(x_test.swapaxes(1, 3)).float())

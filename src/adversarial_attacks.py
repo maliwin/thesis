@@ -23,7 +23,8 @@ def fgsm():
     # FGSM: norms - 1, 2, inf
     from art.attacks.evasion import FastGradientMethod
     # NB: np.inf is FGSM
-    model, art_model, images, preprocessed_images, preprocess_input, decode_predictions = setup_imagenet_model()
+    model, art_model, images, preprocessed_images,\
+    correct_labels, preprocess_input, decode_predictions = setup_imagenet_model()
 
     # NB: epsilon depends on input, i.e. if images are [0, 1] then eps should be of the same order of magnitude
     #     if images are [0, 255], then eps has to be on that order of magnitude
@@ -45,7 +46,8 @@ def fgsm():
 
 def jsma():
     from art.attacks.evasion import SaliencyMapMethod
-    model, art_model, images, preprocessed_images, preprocess_input, decode_predictions = setup_imagenet_model()
+    model, art_model, images, preprocessed_images,\
+    correct_labels, preprocess_input, decode_predictions = setup_imagenet_model()
 
     attack = SaliencyMapMethod(art_model)
     adversarial_images = attack.generate(np.array([images[0]]))
@@ -55,7 +57,8 @@ def jsma():
 
 def pgd():
     from art.attacks.evasion import ProjectedGradientDescent
-    model, art_model, images, preprocessed_images, preprocess_input, decode_predictions = setup_imagenet_model()
+    model, art_model, images, preprocessed_images,\
+    correct_labels, preprocess_input, decode_predictions = setup_imagenet_model()
 
     attack = ProjectedGradientDescent(art_model, max_iter=10)
     adversarial_images = attack.generate(images)
@@ -65,7 +68,8 @@ def pgd():
 
 def cw():
     from art.attacks.evasion import CarliniL2Method, CarliniLInfMethod
-    model, art_model, images, preprocessed_images, preprocess_input, decode_predictions = setup_imagenet_model()
+    model, art_model, images, preprocessed_images,\
+    correct_labels, preprocess_input, decode_predictions = setup_imagenet_model()
 
     # attack1 = CarliniL2Method(art_model, max_iter=30)
     # adversarial_images1 = attack1.generate(np.array([images[0]]))
@@ -84,7 +88,8 @@ def boundary_attack(init_image_idxs=None, target_image_idxs=None,
                     callback=None):
     import time
     from art.attacks.evasion import BoundaryAttack
-    model, art_model, images, preprocessed_images, preprocess_input, decode_predictions = setup_imagenet_model(which_model)
+    model, art_model, images, preprocessed_images,\
+    correct_labels, preprocess_input, decode_predictions = setup_imagenet_model(which_model)
 
     if init_image_idxs or target_image_idxs:
         assert len(init_image_idxs) == len(target_image_idxs)
@@ -137,7 +142,8 @@ def boundary_attack(init_image_idxs=None, target_image_idxs=None,
 
 def deepfool():
     from art.attacks.evasion import DeepFool
-    model, art_model, images, preprocessed_images, preprocess_input, decode_predictions = setup_imagenet_model()
+    model, art_model, images, preprocessed_images,\
+    correct_labels, preprocess_input, decode_predictions = setup_imagenet_model()
 
     attack = DeepFool(art_model, epsilon=0.01)
     adversarial_images = attack.generate(images[:1])
@@ -159,7 +165,8 @@ def deepfool_cifar10():
 
     # # # #
 
-    model2, probability_model2 = get_untrained_model_tf((32, 32, 15))
+    # model2, probability_model2 = get_untrained_model_tf((32, 32, 15))
+    model2 = tf.keras.models.load_model('./saved_models/thermometer_cifar10_5')
 
     loss_object = tf.keras.losses.CategoricalCrossentropy(from_logits=True)
     optimizer = tf.keras.optimizers.Adam()
@@ -173,15 +180,20 @@ def deepfool_cifar10():
         optimizer.apply_gradients(zip(gradients, model.trainable_variables))
 
     defence = ThermometerEncoding(clip_values=(0, 1), num_space=5)
-    art_model2 = TensorFlowV2Classifier(model2, nb_classes=10, input_shape=(32, 32, 3), clip_values=(0, 1),
-                                       preprocessing_defences=defence, train_step=train_step,
-                                       loss_object=loss_object)
+    art_model2 = TensorFlowV2Classifier(model2, nb_classes=10, input_shape=(32, 32, 15), clip_values=(0, 1),
+                                        preprocessing_defences=defence, train_step=train_step,
+                                        loss_object=loss_object)
 
     import time
     t1 = time.time()
-    art_model2.fit(x_train[:3000], to_categorical(y_train[:3000], 10), nb_epochs=3)
+    # art_model2.fit(x_train, to_categorical(y_train, 10), nb_epochs=5)
     t2 = time.time()
     print('time %f' % (t2 - t1))
+
+    # modelname = 'thermometer_cifar10_5'
+    # path = './saved_models/' + modelname
+    # model2.save(path)
+
     attack2 = DeepFool(art_model2)
     adversarial_images2 = attack.generate(x_test[:10])
     a = 5

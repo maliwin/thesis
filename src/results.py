@@ -11,7 +11,7 @@ from adversarial_attacks import *
 
 def save_adversarial_images(images, name):
     # name should be [model]_[attack]_[meta_info]
-    save_numpy_arrays(images, name)
+    save_numpy_array(images, name)
 
 
 def generate_boundary_results():
@@ -21,7 +21,7 @@ def generate_boundary_results():
         # name = 'resnet50v2_boundary_targeted-single-image'
         name = 'null'
         # save_adversarial_images(x_advs, name)
-        save_numpy_arrays(x_advs, name)
+        save_numpy_array(x_advs, name)
         loaded = load_numpy_array(name)
         assert np.all(x_advs == loaded)
 
@@ -41,7 +41,7 @@ def generate_boundary_results():
         x_advs, prediction_history = boundary_attack(init_image_idxs=[12], target_image_idxs=[5], targeted=True)
         name = 'resnet50v2_boundary_targeted-single-image'
         # save_adversarial_images(x_advs, name)
-        save_numpy_arrays(x_advs, name)
+        save_numpy_array(x_advs, name)
         loaded = load_numpy_array(name)
         assert np.all(x_advs == loaded)
 

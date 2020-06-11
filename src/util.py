@@ -12,6 +12,7 @@ from mpl_toolkits.axes_grid1 import ImageGrid
 
 EPOCH_COUNT = 15
 FORCE_RETRAIN = False
+ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 
 def get_untrained_model_pytorch():
@@ -70,9 +71,11 @@ def get_untrained_model_tf(input_shape=(32, 32, 3)):
     return model, probability_model
 
 
-def setup_imagenet_model(which='resnet50v2', preprocessing_defences=None, postprocessing_defences=None):
+def setup_imagenet_model(which='resnet50v2', img_range=255, preprocessing_defences=None, postprocessing_defences=None):
     from art.classifiers import TensorFlowV2Classifier
-    images = load_images('../data/personal_images', (224, 224))
+
+    assert img_range in (1, 255)
+    images, correct_labels = load_personal_images()
     images = images.astype(np.float64)
 
     def _setup_resnetv2_50():
@@ -132,16 +135,21 @@ def setup_imagenet_model(which='resnet50v2', preprocessing_defences=None, postpr
     model, art_preprocessing, preprocess_input, decode_predictions = lookup_setup[which]()
 
     # NB: if we want to go back to 0-255, just remove this stuff and clip values
-    images = images / 255
-    art_preprocessing = art_preprocessing[0] / 255, art_preprocessing[1] / 255
+    clip_values = None
+    if img_range == 1:
+        images = images / 255
+        art_preprocessing = art_preprocessing[0] / 255, art_preprocessing[1] / 255
+        clip_values = (0, 1)
+    elif img_range == 255:
+        clip_values = (0, 255)
 
     art_model = TensorFlowV2Classifier(model=model, loss_object=tf.losses.SparseCategoricalCrossentropy(),
-                                       nb_classes=1000, input_shape=(224, 224, 3), clip_values=(0, 1),
+                                       nb_classes=1000, input_shape=(224, 224, 3), clip_values=clip_values,
                                        preprocessing=art_preprocessing,
                                        preprocessing_defences=preprocessing_defences,
                                        postprocessing_defences=postprocessing_defences)
     preprocessed_images = preprocess_input(np.array(images))
-    return model, art_model, images, preprocessed_images, preprocess_input, decode_predictions
+    return model, art_model, images, preprocessed_images, correct_labels, preprocess_input, decode_predictions
 
 
 def setup_cifar10_model(epochs=EPOCH_COUNT, preload_attempt=True, save_on_preload_fail=True):
@@ -188,7 +196,19 @@ def cifar10_class_id_to_text(class_ids):
     return names
 
 
+def split_correct_classification(x, y_correct, y_pred):
+    # used to split up sucessful and failed adversarial attacks
+    return x[np.argwhere(y_correct != y_pred).flatten()],\
+           x[np.argwhere(y_correct == y_pred).flatten()]
+
+
 def display_images(images, grid_shape, figsize=None, titles=None):
+    if isinstance(list(images), list):
+        images = np.array(images)
+
+    if np.issubdtype(images.dtype, np.floating) and images.max() > 1 + 1e-6:
+        images = images / 255  # this is an ok assumption I think
+
     fig = plt.figure(figsize=figsize)
     grid = ImageGrid(fig, 111, nrows_ncols=grid_shape, axes_pad=0.3)
     if not titles:
@@ -211,7 +231,14 @@ def resize_image(image, new_size):
     return scaled_image
 
 
+def load_personal_images(size=(224, 224)):
+    images = load_images('/../data/personal_images', size)
+    labels = [87, 414, 319, 22, 582, 366, 338, 607, 611, 508, 355, 299, 217, 770, 281, 894]
+    return images, labels
+
+
 def load_images(directory_path, size=None, crop=False):
+    directory_path = ROOT_DIR + directory_path
     filelist = glob.glob(directory_path + '/*.jpg')
     images = []
     for f in filelist:
@@ -254,7 +281,41 @@ def preprocessing_art_tuple(mode, shape=(224, 224, 3)):
         return preprocessing_mean, 1
 
 
-def save_numpy_arrays(np_array, name, directory='results'):
+def save_numpy_array_as_image(np_array, name, directory='/results/images/'):
+    from PIL import Image
+
+    if np.issubdtype(np_array.dtype, np.floating) and np_array.max() <= 1 + 1e-6:
+        np_array = np_array * 255
+    np_array_int = np_array.astype(np.uint8)
+
+    img = Image.fromarray(np_array_int, mode="RGB")
+    fullname = '%s%s.jpg' % (directory, name)
+    img.save(fullname)
+
+
+def save_images_plus_arrays(np_arrays, directory='/results/images', subdirectory=None, names=None, name_prefix=None):
+    if not names:
+        names = np.arange(len(np_arrays))
+
+    if name_prefix:
+        name_prefix += '_'
+    else:
+        name_prefix = ''
+
+    if subdirectory:
+        directory = directory + '/' + subdirectory
+    directory = ROOT_DIR + directory + '/'
+
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+
+    for arr, name in zip(np_arrays, names):
+        whole_name = '%s%s' % (name_prefix, name)
+        save_numpy_array(arr, whole_name, directory)
+        save_numpy_array_as_image(arr, whole_name, directory)
+
+
+def save_numpy_array(np_array, name, directory='results'):
     path = os.path.join(directory, name)
     np.save(path, np_array)
 
@@ -275,6 +336,16 @@ def preload_tensorflow():
     y = tf.keras.layers.Conv2D(
         2, 3, activation='relu', input_shape=input_shape)(x)
     print('loaded tf')
+
+
+def norm_between(x, y, norm=1):
+    assert norm in (1, 2, np.inf)
+    if norm == np.inf:
+        return np.abs(x - y).max()
+    if norm == 2:
+        return np.sqrt(np.sum((x - y) ** 2))
+    if norm == 1:
+        return np.sum(np.abs(x - y))
 
 
 def power_spectrum(image):
