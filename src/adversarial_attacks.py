@@ -165,8 +165,8 @@ def deepfool_cifar10():
 
     # # # #
 
-    # model2, probability_model2 = get_untrained_model_tf((32, 32, 15))
-    model2 = tf.keras.models.load_model('./saved_models/thermometer_cifar10_5')
+    model2, probability_model2 = get_untrained_model_tf((32, 32, 30))
+    # model2 = tf.keras.models.load_model('./saved_models/thermometer_cifar10_5')
 
     loss_object = tf.keras.losses.CategoricalCrossentropy(from_logits=True)
     optimizer = tf.keras.optimizers.Adam()
@@ -179,20 +179,20 @@ def deepfool_cifar10():
         gradients = tape.gradient(loss, model.trainable_variables)
         optimizer.apply_gradients(zip(gradients, model.trainable_variables))
 
-    defence = ThermometerEncoding(clip_values=(0, 1), num_space=5)
-    art_model2 = TensorFlowV2Classifier(model2, nb_classes=10, input_shape=(32, 32, 15), clip_values=(0, 1),
+    defence = ThermometerEncoding(clip_values=(0, 1), num_space=10)
+    art_model2 = TensorFlowV2Classifier(model2, nb_classes=10, input_shape=(32, 32, 30), clip_values=(0, 1),
                                         preprocessing_defences=defence, train_step=train_step,
                                         loss_object=loss_object)
 
     import time
     t1 = time.time()
-    # art_model2.fit(x_train, to_categorical(y_train, 10), nb_epochs=5)
+    art_model2.fit(x_train, to_categorical(y_train, 10), nb_epochs=30)
     t2 = time.time()
     print('time %f' % (t2 - t1))
 
-    # modelname = 'thermometer_cifar10_5'
-    # path = './saved_models/' + modelname
-    # model2.save(path)
+    modelname = 'thermometer_cifar10_30_postfix_10space'
+    path = './saved_models/' + modelname
+    model2.save(path)
 
     attack2 = DeepFool(art_model2)
     adversarial_images2 = attack.generate(x_test[:10])

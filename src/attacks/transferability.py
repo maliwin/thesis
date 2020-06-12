@@ -3,6 +3,7 @@ from util import *
 
 setup_logging()
 
+
 def train_pytorch():
     import torchvision
     import torchvision.transforms as transforms

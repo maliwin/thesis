@@ -6,8 +6,8 @@ setup_logging()
 from art.attacks.evasion import ProjectedGradientDescent
 
 
-def pgd(art_model, images, eps, norm=np.inf, max_iter=100):
-    attack = ProjectedGradientDescent(art_model, norm=norm, eps=eps, max_iter=max_iter)
+def pgd(art_model, images, eps, norm=np.inf, max_iter=100, eps_step=0.1):
+    attack = ProjectedGradientDescent(art_model, norm=norm, eps=eps, max_iter=max_iter, eps_step=eps_step)
     adversarial_images = attack.generate(images)
     adversarial_predictions = art_model.predict(adversarial_images)
     return adversarial_images, adversarial_predictions
