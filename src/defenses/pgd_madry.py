@@ -11,11 +11,11 @@ from art.defences.trainer import AdversarialTrainerMadryPGD
 
 
 def adversarial_pgd():
-
-    model = resnet_v2(input_shape=(32, 32, 3), depth=3 * 6 + 2)
+    # model = resnet_v2(input_shape=(32, 32, 3), depth=3 * 6 + 2)
     (x_train, y_train), (x_test, y_test) = tf.keras.datasets.cifar10.load_data()
     x_train = x_train.astype(np.float32)
 
+    model = keras.models.load_model('./checkpoints/ckpt1/01-1.32')
     model.compile(loss='categorical_crossentropy',
                   optimizer=tf.keras.optimizers.Adam(),
                   metrics=['accuracy'])
@@ -38,7 +38,7 @@ def loaded():
     model = resnet_v2(input_shape=(32, 32, 3), depth=3 * 6 + 2)
     (x_train, y_train), (x_test, y_test) = tf.keras.datasets.cifar10.load_data()
     x_train = x_train.astype(np.float32)
-    model.load_weights(ROOT_DIR + '/defenses/checkpoints/ckpt1/01-2.12')
+    model.load_weights(ROOT_DIR + '/defenses/checkpoints/ckpt2/01-1.97')
     a = 5
 
 
