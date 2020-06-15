@@ -7,7 +7,7 @@ import tensorflow as tf
 import keras
 import keras.callbacks
 
-from small_resnet import resnet_v2
+from small_resnet.small_resnet_tf import resnet_v2
 from art.utils import to_categorical
 from art.classifiers import KerasClassifier
 from art.defences.trainer import AdversarialTrainerMadryPGD
@@ -86,7 +86,7 @@ def loaded():
     y_pred4 = np.argmax(art_model4.predict(x_test), axis=1)
     i4 = np.where(y_pred4 == y_test)[0]
 
-    from art.attacks.evasion import FastGradientMethod, CarliniL2Method
+    from art.attacks.evasion import CarliniL2Method
     a1 = CarliniL2Method(art_model1, max_iter=5, learning_rate=0.5)
     a2 = CarliniL2Method(art_model2, max_iter=5, learning_rate=0.5)
     a3 = CarliniL2Method(art_model3, max_iter=5, learning_rate=0.5)
@@ -102,4 +102,3 @@ if __name__ == '__main__':
     # adversarial_pgd()
     loaded()
     # regular_train()
-
