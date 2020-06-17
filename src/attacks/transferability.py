@@ -88,10 +88,6 @@ def get_pytorch_model():
 
 def transferability():
     import torch
-    from art.attacks.evasion import DeepFool
-    from art.classifiers import PyTorchClassifier, TensorFlowV2Classifier
-    from art.utils import load_cifar10
-
     def pytorch_generate_adv():
         from art.attacks.evasion import DeepFool, FastGradientMethod
         from art.classifiers import PyTorchClassifier
@@ -106,17 +102,7 @@ def transferability():
         x_adv = x_adv.swapaxes(1, 3)
         save_numpy_array(x_adv, 'x_adv', './transferability')
 
-    # m = get_pytorch_model()
-    # m(torch.from_numpy(x_test.swapaxes(1, 3)).float())
-
-    # (x_train, y_train), (x_test, y_test), min_, max_ = load_cifar10()
-    # x_adv = load_numpy_array('x_adv', './transferability')
-    # art_model_tf = TensorFlowV2Classifier(get_tf_model(), input_shape=(32, 32, 3), nb_classes=10)
-    # a = np.argmax(art_model_tf.predict(x_adv), axis=1)
-    # b = np.argmax(art_model_tf.predict(x_test[:25]), axis=1)
-    # print(np.all(a == b))
     pytorch_generate_adv()
-    a = 5
 
 
 if __name__ == '__main__':

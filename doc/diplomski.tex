@@ -10,6 +10,7 @@
 \setcitestyle{numbers,square,super}
 \usepackage[export]{adjustbox}
 \usepackage{float}
+\usepackage{tabularx}
 \usepackage{enumitem}
 
 
@@ -36,7 +37,11 @@ Do 2017. godine, većina timova u natjecanju je imala top-5 točnost veću od $9
 \section{Neprijateljski primjeri}
 Krajem $2013.$ godine pojavljuje se prvi izravni "napad" na duboke neuronske mreže\citep{Szegedy2014IntriguingPO}, gdje je jedna od meta bila prethodno spomenuta uspješna mreža \textit{AlexNet}. Polazna pretpostavka je da duboki modeli, usprkos tome što dobro generaliziraju, imaju ugrađene svojevrsne \textit{slijepe pjege} koje se isplati istražiti.
 \par
-Vrijedi da za neki ispravno klasificirani ulaz $x$ postoji područje u blizini ulaza, $x + r$, gdje je $||r|| < \epsilon$ za neki dovoljno mali radijus $\epsilon > 0$. Uobičajeno je da modeli ulazne vrijednosti iz tog područja također ispravno klasificiraju, kao i $x$, te u općem slučaju vrijedi da neprimjetne perturbacije iz tog $\epsilon$ područja (npr. nasumični šum slabog intenziteta) ne mijenjaju izlaz modela. Rješavanjem optimizacijskog problema pri kojem se minimizira perturbacija $r$ koja izaziva pogrešnu klasifikaciju dolazzi se do takozvanih neprijateljskih (ili suparničkih) primjera (eng. \textit{adversarial example}). Ono što je iznenađujuće i što je potaklo daljnje istraživanje je to što je zapravo vrlo lako za pronaći neprijateljske primjere na \textit{state of the art} modelima kod kojih je perturbacija $r$ praktički potpuno neprimjetna i gdje nije očito zašto mreže neispravno klasificiraju takve ulaze. Jedan od originalnih napada je prikazan na slici \ref{fig:alexnet_adv} gdje \textit{AlexNet} mreža predviđa da su novonastale slike zapravo slike noja.
+Vrijedi da za neki ispravno klasificirani ulaz $x$ postoji područje $x + r$ u blizini ulaza te je uobičajeno da modeli ulazne vrijednosti iz tog područja također ispravno klasificiraju, isto kao i $x$. U općem slučaju vrijedi da neprimjetne perturbacije iz tog područja (npr. nasumični šum slabog intenziteta) ne mijenjaju izlaz modela. To je pretpostavka lokalne generalizacije i tipično vrijedi za probleme iz područja računalnog vida.
+\par
+Međutim, ispostavilo se da ta pretpostavka lokalne generalizacije zapravo ne vrijedi. Otkriveno je da je moguće konstruirati perturbaciju $r$ koja dovodi do pogrešne klasifikacije, a ljudskom oku nije uočljiva. Takve slike se nazivaju neprijateljskim primjerima, a taj pojam se može generalizirati i na mnoga druga područja i na sličan način se mogu napasti sustavi pretvaranja teksta u govor, sustavi za detekciju zloćudnih programa i praktički svi sustavi koji se oslanjaju na dosadašnje modela za duboko učenje. 
+\par
+Ono što je iznenađujuće i što je potaklo daljnje istraživanje je to što je zapravo iznimno lako za pronaći takve neprijateljske primjere na \textit{state of the art} modelima kod kojih je perturbacija $r$ potpuno neprimjetna i to što nije nimalo očito zašto mreže neispravno klasificiraju takve ulaze. Jedan od originalnih napada je prikazan na slici \ref{fig:alexnet_adv} gdje \textit{AlexNet} mreža predviđa da su novonastale slike zapravo slike noja.
 
 \begin{figure}[H]
 \centering
@@ -45,7 +50,7 @@ Vrijedi da za neki ispravno klasificirani ulaz $x$ postoji područje u blizini u
 \label{fig:alexnet_adv}
 \end{figure}
 
-U radu je dan pregled nekoliko metoda generiranja neprijateljskih primjera: neke metode su prikazane zbog njihove povijesne važnosti i utjecaja na daljni razvoj metoda, dok su neke metode iznimno snažne i mjerilo za uspješnost obrane od suparničkih napada. Pokazano je i koliko su napadi uspješni protiv poznatih mreža te kako niti jedan od široko dostupnih modela nije unaprijed otporan na napade. Uz napade su pokazane i obrane, s naglaskom na njihovu (ne)uspješnost pri odupiranju od suparničkih napada, probleme koji su gotovo svim obranama zajednički te potencijalnu budućnost razvoja uspješnijih obrana.
+U radu je dan pregled nekoliko metoda generiranja neprijateljskih primjera: neke metode su prikazane zbog njihove povijesne važnosti i utjecaja na daljni razvoj metoda, dok su neke metode iznimno snažne i mjerilo za uspješnost obrane od suparničkih napada. Pokazano je i koliko su napadi uspješni protiv poznatih mreža te kako niti jedan od široko dostupnih modela nije unaprijed otporan na napade. Uz napade su pokazane i obrane, s naglaskom na njihovu (ne)uspješnost pri odupiranju od postojećih suparničkih napada, probleme koji su gotovo svim obranama zajednički te potencijalnu budućnost razvoja uspješnijih obrana. 
 
 
 \chapter{Programska potpora}
@@ -54,7 +59,7 @@ Postoji mnogo biblioteka koje pružaju sve potrebno za duboko učenje i računal
 \section{Biblioteke za neprijateljske primjere}
 Usprkos tome što su suparnički primjeri relativno nov koncept, već postoji mnogo biblioteka koje pružaju implementaciju velikog broja suparničkih napada, a često su i napadi implementirani izravno od strane autora napada. Istaknule su se tri biblioteke za generiranje suparničkih napada: \textit{CleverHans}\citep{papernot2018cleverhans}, \textit{Foolbox Native}\citep{rauber2017foolbox} i \textit{Adversarial Robustness Toolbox (ART)}\citep{art2018}.
 \par
-Za odabir biblioteke je razmatrano nekoliko stvari: dostupnost i ekstenzivnost dokumentacije, raznovrsnost implementiranih napada, jednostavnost korištenja, zahtjevana programska potpora te postoji li implementacija obrana. Za svaku biblioteku je implementirano generiranje neprijateljskih primjera napadom koji je opisan u \ref{fgm}, a napad je proveden na model opisan u \ref{x}.
+Za odabir biblioteke je razmatrano nekoliko stvari: dostupnost i ekstenzivnost dokumentacije, raznovrsnost implementiranih napada, jednostavnost korištenja, zahtjevana programska potpora te postoji li implementacija obrana. Za svaku biblioteku je implementirano generiranje neprijateljskih primjera napadom koji je opisan u \ref{fgm}, a napad je proveden na model opisan u .
 \par
 \textit{Cleverhans} ima kratku dokumentaciju za sve napade i poveznicu na relevantni rad koji opisuje napad, međutim ne postoji dokumentacija u formatu koji se lako pretražuje. \textit{Foolbox} i \textit{ART} imaju dokumentaciju dostupnu u takvom formatu, međutim \textit{Foolbox} dokumentacija ne opisuje kako se napad poziva i s kojim argumentima, što otežava korištenje bez detaljnijeg proučavanja izvornog kôda, dok je \textit{ART} dokumentacija eksplicitna kod toga.
 \par
@@ -104,17 +109,62 @@ Ukupno mreža ima $2,168,362$ parametara koji se mogu naučiti. Na slici \ref{fi
 \section{Model prijetnje}
 Model prijetnje (eng. \textit{threat model}) je proces kojim se potencijalne prijetnje mogu nabrojati i identificirati te se mogu odrediti određene mjere kao prioritet. Neki od dijelova modela prijetnje mogu biti: frekvencija interakcije s metom napada, željena vrsta pogrešne klasifikacije, količina znanja o meti napada i specifičnost napada. Prije opisivanja navedenih aspekata modela prijetnje uvedeno je nekoliko relevantnih simbola koji se učestalo pojavljuju u literaturi i u ovom radu.
 
-\begin{enumerate}[noitemsep, label=\textbullet]
-  \item $x$, $l$ -- originalni ulaz te pripadajuća labela
-  \item $x'$, $l'$ -- neprijateljski primjer i pripadajuća labela 
-  \item $f(\cdot)$ -- model dubokog učenja
-  \item $J(\cdot)$ -- funkcija gubitka, u većini slučajeva gubitak unakrsne entropije
-  \item $||\cdot||_{p}$ -- p-norma, p je najčešće $0$, $2$ i $\infty$
-\end{enumerate}
+\textbf{Osnovni pojmovi i simboli} \\
+\begin{tabular}{ l c l }
+\textbullet \ $f(\cdot)$ & -- & model dubokog učenja \\ 
+\textbullet \ $x$, $l$ & -- & originalni ulaz te pripadajuća labela \\  
+\textbullet \ $x'$, $l'$ & -- & neprijateljski primjer i pripadajuća labela \\
+\textbullet \ $J(\cdot)$ & -- & funkcija gubitka, u većini slučajeva gubitak unakrsne entropije \\
+\textbullet \ $||\cdot||_{p}$ & -- & p-norma, p je najčešće $0$, $2$ ili $\infty$. Dodatna korištena oznaka za norme je $\ell_{p}$.
+\end{tabular}
+\linebreak
+\linebreak
 
-Osnovni termini, lažno pozitivni/negativni(*) primjeri, white/black box, targeted/nontargeted, one-time/iterative \citep{Yuan2019AdversarialEA}
+\begin{table}[H]
+\textbf{Frekvencija interakcije s metom napada}
+\begin{tabularx}{\textwidth}{ l c X }
+\textbullet \ Jednokratni napad & -- & jednokratni napadi (eng. \textit{one-time}) su napadi kojima je potreban samo jedan pristup modelu da generiraju neprijateljski primjer. Ovi napadi su brzi, ali i mnogo slabiji od iterativnih napada te nisu u fokusu istraživanja. Na primjer, napad opisan u \ref{fgm} je jednokratni napad. \\ 
+\textbullet \ Iterativni napad & -- & iterativni napadi zahtjevaju više pristupa modelu da bi generirali neprijateljski primjer. Ovakvi napadi generiraju daleko bolje neprijateljske primjere. Većina napada pripada ovoj kategoriji.
+\end{tabularx}
+\end{table}
+
+\begin{table}[H]
+\textbf{Vrsta pogrešne klasifikacije}
+\begin{tabularx}{\textwidth}{ l c X }
+\textbullet \ Lažno pozitivni napad & -- & lažno pozitivni (eng. \textit{false positive}) primjeri u kontekstu neprijateljskih napada kod klasifikacijskih problema su čovjeku potpuno neprepoznatljivi (npr. šum), dok mreža s visokom vjerojatnošću klasificira sliku. \\ 
+\textbullet \ Lažno negativni napad & -- & lažno negativni (eng. \textit{false negative}) primjeri su oni koje čovjek vrlo lako prepozna, a mreža pogrešno klasificira zbog nevidljive perturbacije. Fokus rada su od početka lažno negativni primjeri. Usporedba napada dana je u slici \ref{fig:fp_fn}.
+\end{tabularx}
+\end{table}
+
+
+\begin{figure}[H]
+  \centering
+  \subfloat[Lažno pozitivni napad. Mreža klasificra sliku kao prostirka za molitvu (eng. \textit{prayer rug}) s vjerojatnošću $98.66\%$.]{\includegraphics[width=0.48\textwidth]{img/results/prayer_rug_98.66_resnet_cw.png}\label{fig:a}}
+  \hfill
+  \subfloat[Lažno negativni napad. Mreža klasificra sliku kao zmaj (eng. \textit{kite}) s vjerojatnošću $91.89\%$.]{\includegraphics[width=0.48\textwidth]{img/results/kite_91.89_resnet_cw.png}\label{fig:b}}
+  \caption{Primjeri lažno pozitivnog i lažno negativnog napada. Napad proveden na \textit{ResNet50V2} mreži korištenjem \textit{Carlini and Wagner} $\ell_{2}$ napada opisanog u \ref{x}.}
+\end{figure}\label{fig:fp_fn}
+
+
+\begin{table}[H]
+\textbf{Znanje o meti napada}
+\begin{tabularx}{\textwidth}{ l c X }
+\textbullet \ Bijela kutija & -- & model se naziva bijela kutija (eng. \textit{white box}) ako je sve o modelu unaprijed poznato napadaču, uključujući: arhitekturu, parametre mreže, aktivacijske funkcije, hiperparametre i sve druge moguće detalje mreže. Napadi koji se temelje na modelu bijele kutije često iskorištavaju gradijente mreže pri konstruiranju neprijateljskog primjera. \\ 
+\textbullet \ Crna kutija & -- & suprotno tome, model crne kutije (eng. \textit{black box}) pretpostavlja nedostatak svih mogućih informacija, osim izlaza iz mreže. Na primjer, ukoliko se napada neka mreža "u oblaku", njoj se pristupa tako da joj se preda ulaz te nije moguće direktno saznati dodatne detalje o mreži. Začudo, moguće je konstruirati neprijateljske primjere samo na temelju izlaza mreže.
+\end{tabularx}
+\end{table}
+
+\begin{table}[H]
+\textbf{Specifičnost napada}
+\begin{tabularx}{\textwidth}{ l c X }
+\textbullet \ Ciljani napad & -- & ciljani napad (eng. \textit{targeted attack}) je oblik napada gdje se za neki neprijateljski primjer pokušava dobiti unaprijed određen izlaz mreže. Uz to, dodatni zahtjev može biti i da se maksimizira vjerojatnost odabranog razreda. \\ 
+\textbullet \ Neciljani napad & -- & neciljani napad (eng. \textit{untargeted attack}) zahtjeva jedino da je klasifikacija neprijateljskog primjera neispravna. Općenito je lakše i brže konstruirati neciljani napad.
+\end{tabularx}
+\end{table}
+
 \section{Pojava prvih neprijateljskih primjera}
-intriguing properties\citep{Szegedy2014IntriguingPO}
+
+
 \section{Brza metoda temeljena na gradijentima}\label{fgm}
 fg(s)m\citep{Goodfellow2015ExplainingAH}
 \section{DeepFool} df\citep{MoosaviDezfooli2016DeepFoolAS}

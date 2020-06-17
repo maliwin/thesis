@@ -148,7 +148,7 @@ def adversarial_pgd():
     @tf.function
     def train_step(model, images, labels):
         with tf.GradientTape() as tape:
-            predictions = model(images, training=True)
+            predictions = model(images, traincing=True)
             loss = loss_object(labels, predictions)
         gradients = tape.gradient(loss, model.trainable_variables)
         optimizer.apply_gradients(zip(gradients, model.trainable_variables))
