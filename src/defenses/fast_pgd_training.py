@@ -61,11 +61,11 @@ def evaluate_fast_pgd_training():
     y_test = y_test.flatten()
 
     model1 = resnet_18()
-    model1.load_state_dict(torch.load('saved_models/pytorch_cifar10_small_resnet_epochs20'))
+    model1.load_state_dict(torch.load('saved_models/pytorch_cifar10_small_resnet_epochs15'))
     model1.eval()
 
     model2 = resnet_18()
-    model2.load_state_dict(torch.load('saved_models/pytorch_fbf_cifar10_small_resnet_epochs20'))
+    model2.load_state_dict(torch.load('saved_models/pytorch_fbf_cifar10_small_resnet_epochs15'), strict=False)
     model2.eval()
 
 

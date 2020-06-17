@@ -51,8 +51,6 @@ adversarial_images = attack.generate(x_test[:9])
 correct_predictions = y_test[:9]
 nonadversarial_predictions = np.argmax(art_model.predict(x_test[:9]), axis=1)
 adversarial_predictions = np.argmax(art_model.predict(adversarial_images), axis=1)
-a = 5
-# TODO: get labels
 
 x_train_adv = x_train[:25000]
 x_train_adv = attack.generate(x_train_adv)

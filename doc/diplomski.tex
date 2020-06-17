@@ -3,13 +3,14 @@
 \usepackage{longtable}
 \usepackage{ltablex}
 \usepackage{pdfpages}
-\usepackage{hyperref}
+\usepackage[hidelinks]{hyperref}
 \usepackage{mathtools}
 \usepackage{listings}
 \usepackage{subfig}
 \setcitestyle{numbers,square,super}
 \usepackage[export]{adjustbox}
 \usepackage{float}
+\usepackage{enumitem}
 
 
 \begin{document}
@@ -31,35 +32,100 @@
 Raspoznavanje objekata jedan je od ključnih problema područja računalnog vida. Pri rješavanju problema raspoznavanja objekata se na ulaz nekog sustava dovede slika nekog objekta, a na izlazu se očekuje ispravna klasifikacija u neki od predodređenih razreda. Čovjeku ovaj zadatak ne predstavlja veliki problem, no još uvijek ne postoji zadovoljavajuće rješenje problema koje bi vrijedilo za opći slučaj. Trenutno najbolja takva rješenja temelje se na konvolucijskim neuronskim mrežama. \par
 Razvoj konvolucijskih mreža počeo je osamdesetih godina prošlog stoljeća. Počelo je razvojem \textit{neocognitron}[citat?]-a--neuronske mreže inspirirane biološkim stanicama vidne kore mozga. Krajem devedesetih godina se pojavljuje konvolucijska neuronska mreža LeNet5. LeNet5 mreža je vrlo uspješno raspoznavala rukom pisane znamenke te je ova mreža bila početna točka za daljnja istraživanja drugih neuronskih mreža. [citati] \par
 \textit{ImageNet}[citat] projekt je velika baza podataka predviđena za istraživanje područja raspoznavanja objekata. S više od $14$ milijuna slika podijeljenih u $20000$ kategorija, \textit{ImageNet} skup je daleko najveći slobodno dostupni skup. Počevši od 2010.[?] godine, \textit{ImageNet} projekt organizira godišnje natjecanje, \textit{ImageNet Large Scale Visual Recognition Challenge} (ILSVRC). Veliki skok u točnosti pri raspoznavanju dogodio se 2012. godine kada je konvolucijska neuronska mreža \textit{AlexNet}[citat] postigla top-5 pogrešku od samo $15.3\%$, što je bilo $10.8\%$ manje od sljedeće mreže. To je postignuto korištenjem grafičkih procesora pri treniranju, što je potaknulo svojevrsnu revoluciju u području dubokog učenja. \par
-Do 2017. godine, većina timova u natjecanju je imala top-5 točnost veću od $95\%$. Danas se u raznim bibliotekama mogu naći unaprijed istrenirane mreže koje postižu vrlo dobre rezultate, te će se one spominjati i koristiti u nastavku rada. Neke od njih su \textit{ResNet}[citat], \textit{Xception}[citat] i \textit{VGG}[citat]. Sve spomenute mreže postižu vrlo zadovoljavajuće točnosti pri ispitivanju (top-5 točnosti iznad $90\%$) i čini se da mogu dobro generalizirati. No u nastavku rada će biti pokazan oblik napada na konvolucijske mreže koji dovodi u pitanje činjenicu da današnje konvolucijske mreže dobro generaliziraju.
+Do 2017. godine, većina timova u natjecanju je imala top-5 točnost veću od $95\%$. Danas se u raznim bibliotekama mogu naći unaprijed istrenirane mreže koje postižu vrlo dobre rezultate, te će se one spominjati i koristiti u nastavku rada. Neke od tih mreža su primjerice \textit{ResNet}[citat], \textit{Xception}[citat] i \textit{VGG}[citat]. Sve spomenute mreže postižu vrlo zadovoljavajuće točnosti pri ispitivanju (top-5 točnosti iznad $90\%$) i čini se da mogu dobro generalizirati. No u nastavku rada će biti pokazan oblik napada na konvolucijske mreže koji dovodi u pitanje činjenicu da današnje konvolucijske mreže dobro generaliziraju.
 \section{Neprijateljski primjeri}
 Krajem $2013.$ godine pojavljuje se prvi izravni "napad" na duboke neuronske mreže\citep{Szegedy2014IntriguingPO}, gdje je jedna od meta bila prethodno spomenuta uspješna mreža \textit{AlexNet}. Polazna pretpostavka je da duboki modeli, usprkos tome što dobro generaliziraju, imaju ugrađene svojevrsne \textit{slijepe pjege} koje se isplati istražiti.
 \par
-Vrijedi da za neki ispravno klasificirani ulaz $x$ postoji područje u blizini ulaza, $x + r$, gdje je $||r|| < \epsilon$ za neki dovoljno mali radijus $\epsilon > 0$. Uobičajeno je da modeli ulazne vrijednosti iz tog područja također ispravno klasificiraju, kao i $x$, te u općem slučaju vrijedi da neprimjetne perturbacije iz tog $\epsilon$ područja (npr. nasumični šum slabog intenziteta) ne mijenjaju izlaz modela. Rješavanjem optimizacijskog problema pri kojem se minimizira perturbacija $r$ koja izaziva pogrešnu klasifikaciju dolazzi se do takozvanih neprijateljskih (ili suparničkih) primjera (eng. \textit{adversarial example}). Ono što je iznenađujuće i što je potaklo daljnje istraživanje je to što je zapravo vrlo lako za pronaći neprijateljske primjere na \textit{state of the art} modelima kod kojih je perturbacija $r$ praktički potpuno neprimjetna i gdje nije očito zašto mreže neispravno klasificiraju takve ulaze. U nastavku rada je dan pregled nekoliko metoda generiranja neprijateljskih primjera: neke metode su prikazane zbog njihove povijesne važnosti i utjecaja na daljni razvoj metoda, dok su neke metode iznimno snažne i mjerilo za uspješnost obrane od suparničkih napada. Uz napade su pokazane i obrane, s naglaskom na njihovu (ne)uspješnost pri odupiranju od suparničkih napada, probleme koji su im zajednički te potencijalnu budućnost razvoja uspješnijih obrana.
+Vrijedi da za neki ispravno klasificirani ulaz $x$ postoji područje u blizini ulaza, $x + r$, gdje je $||r|| < \epsilon$ za neki dovoljno mali radijus $\epsilon > 0$. Uobičajeno je da modeli ulazne vrijednosti iz tog područja također ispravno klasificiraju, kao i $x$, te u općem slučaju vrijedi da neprimjetne perturbacije iz tog $\epsilon$ područja (npr. nasumični šum slabog intenziteta) ne mijenjaju izlaz modela. Rješavanjem optimizacijskog problema pri kojem se minimizira perturbacija $r$ koja izaziva pogrešnu klasifikaciju dolazzi se do takozvanih neprijateljskih (ili suparničkih) primjera (eng. \textit{adversarial example}). Ono što je iznenađujuće i što je potaklo daljnje istraživanje je to što je zapravo vrlo lako za pronaći neprijateljske primjere na \textit{state of the art} modelima kod kojih je perturbacija $r$ praktički potpuno neprimjetna i gdje nije očito zašto mreže neispravno klasificiraju takve ulaze. Jedan od originalnih napada je prikazan na slici \ref{fig:alexnet_adv} gdje \textit{AlexNet} mreža predviđa da su novonastale slike zapravo slike noja.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.5\textwidth,keepaspectratio]{img/other/alexnet_adv.jpg}
+\caption{Primjer suparničkog napada na \textit{AlexNet} mrežu\citep{Szegedy2014IntriguingPO}. U lijevom stupcu su originalne, ispravno klasificirane slike. U srednjem stupcu se nalazi perturbacija koja se nadodaje na originalnu sliku, a u desnom stupcu su sve tri novonastale slike klasificirane kao noj.}
+\label{fig:alexnet_adv}
+\end{figure}
+
+U radu je dan pregled nekoliko metoda generiranja neprijateljskih primjera: neke metode su prikazane zbog njihove povijesne važnosti i utjecaja na daljni razvoj metoda, dok su neke metode iznimno snažne i mjerilo za uspješnost obrane od suparničkih napada. Pokazano je i koliko su napadi uspješni protiv poznatih mreža te kako niti jedan od široko dostupnih modela nije unaprijed otporan na napade. Uz napade su pokazane i obrane, s naglaskom na njihovu (ne)uspješnost pri odupiranju od suparničkih napada, probleme koji su gotovo svim obranama zajednički te potencijalnu budućnost razvoja uspješnijih obrana.
+
 
 \chapter{Programska potpora}
 \section{Odabir biblioteke za duboko učenje}
-tensorflow\citep{abadi2016tensorflow} keras\citep{chollet2015keras}
+Postoji mnogo biblioteka koje pružaju sve potrebno za duboko učenje i računalni vid. U nastavku rada se koristi \textit{Tensorflow} 2\citep{abadi2016tensorflow} u kombinaciji s bibliotekom \textit{Keras}\citep{chollet2015keras}. Zbog ogromnog dobitka u brzini izvođenja, ove biblioteke su korištene zajedno s platformom \textit{CUDA} koja omogućava iskorištavanje grafičkog procesora za obradu opće namjene (eng. \textit{graphics processing unit for general purpose processing}, GPGPU). Grafička kartica korištena u sklopu generiranja rezultata u radu je NVIDIA GeForce RTX 2060 SUPER.
 \section{Biblioteke za neprijateljske primjere}
-foolbox\citep{rauber2017foolbox} cleverhans\citep{papernot2018cleverhans} art\citep{art2018}
+Usprkos tome što su suparnički primjeri relativno nov koncept, već postoji mnogo biblioteka koje pružaju implementaciju velikog broja suparničkih napada, a često su i napadi implementirani izravno od strane autora napada. Istaknule su se tri biblioteke za generiranje suparničkih napada: \textit{CleverHans}\citep{papernot2018cleverhans}, \textit{Foolbox Native}\citep{rauber2017foolbox} i \textit{Adversarial Robustness Toolbox (ART)}\citep{art2018}.
+\par
+Za odabir biblioteke je razmatrano nekoliko stvari: dostupnost i ekstenzivnost dokumentacije, raznovrsnost implementiranih napada, jednostavnost korištenja, zahtjevana programska potpora te postoji li implementacija obrana. Za svaku biblioteku je implementirano generiranje neprijateljskih primjera napadom koji je opisan u \ref{fgm}, a napad je proveden na model opisan u \ref{x}.
+\par
+\textit{Cleverhans} ima kratku dokumentaciju za sve napade i poveznicu na relevantni rad koji opisuje napad, međutim ne postoji dokumentacija u formatu koji se lako pretražuje. \textit{Foolbox} i \textit{ART} imaju dokumentaciju dostupnu u takvom formatu, međutim \textit{Foolbox} dokumentacija ne opisuje kako se napad poziva i s kojim argumentima, što otežava korištenje bez detaljnijeg proučavanja izvornog kôda, dok je \textit{ART} dokumentacija eksplicitna kod toga.
+\par
+Što se tiče jednostavnosti korištenja, \textit{Cleverhans} je bio najjednostavniji za primjenu u ovom jednostavnom primjeru. \textit{Foolbox} zahtjeva da se slike pretvore u određen format prije pokretanja napada, što otežava korištenje. \textit{ART}, međutim, zahtjeva dodatne informacije pri konstruiranju napada kao što su broj razreda, dimenzije ulaza, funkcija gubitka i granične vrijednosti, što druge biblioteke ne traže.
+\par
+\textit{Cleverhans} i \textit{Foolbox} imaju vrlo specifične zahtjeve za programsku potporu, iako će \textit{Cleverhans} u budućnosti podupirati više od samo \textit{Tensorflow}. \textit{ART} pruža potporu za mnoštvo biblioteka: \textit{Tensorflow} (v1 i v2), \textit{Keras}, \textit{PyTorch}, \textit{MXNet} i još njih.
+\par
+Od navedenih biblioteka, \textit{ART} je jedina koja već sada ima implementirane neke od obrana u literaturi. \textit{Cleverhans} biblioteka ima planove za implementaciju u budućnosti, dok \textit{Foolbox} podržava samo napade.
+\par
+Zbog svega navedenog, u nastavku rada se koristi samo \textit{Adversarial Robustness Toolbox}. Dodatno, autori biblioteke su vrlo aktivni na \textit{GitHub}-u i iznimno brzo reagiraju kada se postavi pitanje ili prijavi problem. Pri izradi rada otkriveno je nekoliko \textit{bug}-ova koji su popravljeni u vrlo kratkom roku te su zahvaljujući autorima minimalno usporavali izradu rada.
+
 \section{Skupovi podataka}
-imagenet, cifar10, personal
+\textit{ImageNet}\citep{?} je široko korištena baza podataka slika s preko $14$ milijuna slika raspoređenih u više od $20000$ razreda. \textit{ImageNet} je praktički postao standard za treniranje i evaluaciju rada modela pri klasifikaciji objekata. Neki od modela korišteni u radu su unaprijed trenirani na \textit{ImageNet} bazi podataka na kojima postižu iznimno visoku točnost.
+\par
+Neke obrane i posljedično napadi će u nastavku rada biti evaluirani na \textit{CIFAR-10}\citep{?} skupu podataka. \textit{CIFAR-10} sadrži samo $10$ disjunktnih razreda, te $50000$ slika za treniranje mreže. Nužno je koristiti i ovaj skup podataka jer pojedine obrane još uvijek nije moguće skalirati na \textit{ImageNet} razinu jer vrijeme izvođenja nije razumno.
+\par
+U svrhu rada je također odabrano $16$ slika koje bi \textit{ImageNet} modeli trebali ispravno klasificirati. Popis slika i izlazi određenih modela nalaze se u dodatku\textsuperscript{\ref{dodatak}}.
 \section{Konvolucijski modeli}
-resnet, etc, onaj mali model
+Primarna meta napada u radu je mreža \textit{ResNet}\citep{resnetv2}, i to verzija s 50 slojeva koja je unaprijed trenirana na \textit{ImageNet} skupu. Mreža postiže top-1 točnost od $76\%$, te top-5 točnost od $93\%$.  U početnim fazama izrade rada razmatrano je više mreža, međutim \textit{ResNet} mreža je puno brža pri evaluaciji što ubržava i olakšava evaluaciju napada i obrana. Korištenje ove mreže ne smanjuje općenitost ideja predstavljenih u radu, pošto su sve konvolucijske mreže jednako ranjive na neprijateljske napade. Lakoća provođenja neprijateljskih napada je "problem" koji sve konvolucijske mreže dijele u jednakoj mjeri, i trenutno ne postoji niti jedna takva mreža koja je sama po sebi otporna na njih. Dodatno, kôd priložen uz rad dopušta provođenje napada na sljedeće mreže: \textit{DenseNet121}, \textit{VGG16}, \textit{VGG19}, \textit{MobileNetV2} te \textit{Xception}.
+\par
+Osim \textit{ResNet} mreže, dodatno je konstruirana i jednostavna konvolucijska mreža za klasifikaciju \textit{CIFAR-10} slika. Mreža se sastoji od 11 slojeva, redom:
+\begin{enumerate}[noitemsep, label=\textbullet]
+  \item konvolucijski sloj oblika $32\times32\times32$ s filtrom veličine $3\times3$
+  \item konvolucijski sloj oblika $32\times32\times32$ s filtrom veličine $3\times3$
+  \item sloj sažimanja oblika $2\times2$
+  \item sloj ispadanja s vjerojatnošću $0.25$
+  \item konvolucijski sloj oblika $16\times162\times64$ s filtrom veličine $3\times3$
+  \item konvolucijski sloj oblika $16\times162\times64$ s filtrom veličine $3\times3$
+  \item sloj sažimanja oblika $2\times2$
+  \item sloj ispadanja s vjerojatnošću $0.25$
+  \item potpuno povezani sloj veličine $512$
+  \item sloj ispadnja s vjerojatnošću $0.50$
+  \item potpuno povezani sloj veličine $10$, pošto se klasificra u 10 razreda
+\end{enumerate}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\textwidth,keepaspectratio]{img/other/toy_cifar10.png}
+\caption{Skica jednostavne mreže za \textit{CIFAR-10} mrežu. Nisu prikazani slojevi ispadanja.}
+\label{fig:toy_cifar10}
+\end{figure}
+
+Ukupno mreža ima $2,168,362$ parametara koji se mogu naučiti. Na slici \ref{fig:toy_cifar10} je skica mreže. Aktivacijska funkcija između relevantnih slojeva je \textit{ReLU}. Mreža već nakon $15$ epoha lako postiže točnost od $75\%$ na skupu za testiranje korištenjem stohastičnog gradijentnog spusta uz stopu učenja od $0.02$, bez ikakvog dodatnog podešavanja hiperparametara. Nakon $25$ epoha postiže točnost od $79.47\%$, no i u tom trenutku mreža nije pretrenirana. Za potrebe rada nije nužno maksimizirati točnost jer ne bi promijenilo rezultate. Jednako je lagano za pronaći suparničke primjere i na vrlo dobro istreniranim mrežama kao i ovakvim jednostavnim mrežama.
 
 
 \chapter{Neprijateljski primjeri I}
 \section{Model prijetnje}
+Model prijetnje (eng. \textit{threat model}) je proces kojim se potencijalne prijetnje mogu nabrojati i identificirati te se mogu odrediti određene mjere kao prioritet. Neki od dijelova modela prijetnje mogu biti: frekvencija interakcije s metom napada, željena vrsta pogrešne klasifikacije, količina znanja o meti napada i specifičnost napada. Prije opisivanja navedenih aspekata modela prijetnje uvedeno je nekoliko relevantnih simbola koji se učestalo pojavljuju u literaturi i u ovom radu.
+
+\begin{enumerate}[noitemsep, label=\textbullet]
+  \item $x$, $l$ -- originalni ulaz te pripadajuća labela
+  \item $x'$, $l'$ -- neprijateljski primjer i pripadajuća labela 
+  \item $f(\cdot)$ -- model dubokog učenja
+  \item $J(\cdot)$ -- funkcija gubitka, u većini slučajeva gubitak unakrsne entropije
+  \item $||\cdot||_{p}$ -- p-norma, p je najčešće $0$, $2$ i $\infty$
+\end{enumerate}
+
 Osnovni termini, lažno pozitivni/negativni(*) primjeri, white/black box, targeted/nontargeted, one-time/iterative \citep{Yuan2019AdversarialEA}
 \section{Pojava prvih neprijateljskih primjera}
 intriguing properties\citep{Szegedy2014IntriguingPO}
-\section{Brza metoda temeljena na gradijentima}
+\section{Brza metoda temeljena na gradijentima}\label{fgm}
 fg(s)m\citep{Goodfellow2015ExplainingAH}
 \section{DeepFool} df\citep{MoosaviDezfooli2016DeepFoolAS}
 
 
 \chapter{Obrana dubokih konvolucijskih modela I}
-opisati vrste obrane \\
+\section{Naivne obrane}
+\subsection{JPEG kompresija}
+\subsection{Gaussovo zaglađivanje}
+\section{Neprijateljsko treniranje - FGSM}
+\section{Termometar kodiranje}
 
 \chapter{Neprijateljski primjeri II}
 \section{Neučinkovitost obrana} ...
@@ -69,21 +135,21 @@ opisati vrste obrane \\
 
 \chapter{Obrana dubokih konvolucijskih modela II}
 \section{Preduvjeti uspješnih obrana}
-\section{PGD adversarial training}
-\section{FBF training}
+\section{Neprijateljsko treniranje - PGD}
+\subsection{FBF training}
 \section{Dokazivost obrane od neprijateljskih napada}
 \section{Budući rad}
 
 \chapter{Zaključak}
-Konvolucijske neuronske mreže su se pokazale iznimno uspješnima pri rješavanju problema klasifikacije objekata. Međutim, pojava neprijateljskih primjera postavlja 
+Konvolucijske neuronske mreže su se pokazale iznimno uspješnima pri rješavanju problema klasifikacije slika. Međutim, pojava neprijateljskih primjera 
 
 
 \bibliography{literatura}
 \bibliographystyle{fer}
 
-\chapter{Dodatak}
+\chapter{Dodatak}\label{dodatak}
 \section{Osobni skup slika}
-U \ref{ref_personal_image_table} je $16$ slika i labela koje su u radu korištene za generiranje suparničkih primjera za modele trenirane na \textit{ImageNet} skupu podataka. Sve slike su odabrane tako da spadaju unutar $1000$ razreda za koje su modeli predviđeni, dakle slike bi trebale biti ispravno klasficirane. Također, sve slike su unaprijed izrezane u oblik kvadrata kako ne bi došlo do degradacije kvalitete pri smanjenju rezolucije na $224\times224$. Zahvaljujem se Sarah James na dopuštenju za korištenje slika u radu.
+U \ref{ref_personal_image_table} je $16$ slika i labela koje su u radu korištene za generiranje suparničkih primjera za modele trenirane na \textit{ImageNet} skupu podataka. Sve slike su odabrane tako da spadaju unutar $1000$ razreda za koje su modeli predviđeni, dakle slike bi trebale biti ispravno klasficirane. Također, sve slike su unaprijed izrezane u oblik kvadrata kako ne bi došlo do prevelike degradacije kvalitete pri smanjenju rezolucije na $224\times224$. Ovim putem se zahvaljujem Sarah James na dopuštenju za korištenje slika u radu.
 
 \begin{figure}
     \centering

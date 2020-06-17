@@ -66,13 +66,13 @@ def train_tf():
     import tensorflow as tf
 
     model, _ = get_untrained_model_tf()
-    model.compile(optimizer=tf.keras.optimizers.SGD(learning_rate=0.01, momentum=0.0),
+    model.compile(optimizer=tf.keras.optimizers.SGD(learning_rate=0.02, momentum=0.0),
                   loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
                   metrics=['accuracy'])
     (x_train, y_train), (x_test, y_test) = tf.keras.datasets.cifar10.load_data()
     x_train, x_test = x_train / 255, x_test / 255  # (0, 1) range
     model.fit(x_train, y_train, epochs=25, validation_data=(x_test, y_test))
-    model.save('./transferability/tf')
+    # model.save('./transferability/tf')
 
 
 def get_tf_model():
@@ -120,6 +120,6 @@ def transferability():
 
 
 if __name__ == '__main__':
-    # train_tf()
+    train_tf()
     # train_pytorch()
-    transferability()
+    # transferability()
