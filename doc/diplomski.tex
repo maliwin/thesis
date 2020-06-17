@@ -78,7 +78,7 @@ Neke obrane i posljedično napadi će u nastavku rada biti evaluirani na \textit
 \par
 U svrhu rada je također odabrano $16$ slika koje bi \textit{ImageNet} modeli trebali ispravno klasificirati. Popis slika i izlazi određenih modela nalaze se u dodatku\textsuperscript{\ref{dodatak}}.
 \section{Konvolucijski modeli}
-Primarna meta napada u radu je mreža \textit{ResNet}\citep{resnetv2}, i to verzija s 50 slojeva koja je unaprijed trenirana na \textit{ImageNet} skupu. Mreža postiže top-1 točnost od $76\%$, te top-5 točnost od $93\%$.  U početnim fazama izrade rada razmatrano je više mreža, međutim \textit{ResNet} mreža je puno brža pri evaluaciji što ubržava i olakšava evaluaciju napada i obrana. Korištenje ove mreže ne smanjuje općenitost ideja predstavljenih u radu, pošto su sve konvolucijske mreže jednako ranjive na neprijateljske napade. Lakoća provođenja neprijateljskih napada je "problem" koji sve konvolucijske mreže dijele u jednakoj mjeri, i trenutno ne postoji niti jedna takva mreža koja je sama po sebi otporna na njih. Dodatno, kôd priložen uz rad dopušta provođenje napada na sljedeće mreže: \textit{DenseNet121}, \textit{VGG16}, \textit{VGG19}, \textit{MobileNetV2} te \textit{Xception}.
+Primarna meta napada u radu je mreža \textit{ResNet V2}\citep{resnetv2}, i to verzija s 50 slojeva koja je unaprijed trenirana na \textit{ImageNet} skupu. Mreža postiže top-1 točnost od $76\%$, te top-5 točnost od $93\%$.  U početnim fazama izrade rada razmatrano je više mreža, međutim \textit{ResNet} mreža je puno brža pri evaluaciji što ubržava i olakšava evaluaciju napada i obrana. Korištenje ove mreže ne smanjuje općenitost ideja predstavljenih u radu, pošto su sve konvolucijske mreže jednako ranjive na neprijateljske napade. Lakoća provođenja neprijateljskih napada je "problem" koji sve konvolucijske mreže dijele u jednakoj mjeri, i trenutno ne postoji niti jedna takva mreža koja je sama po sebi otporna na njih. Dodatno, kôd priložen uz rad dopušta provođenje napada na sljedeće mreže: \textit{DenseNet121}, \textit{VGG16}, \textit{VGG19}, \textit{MobileNetV2} te \textit{Xception}.
 \par
 Osim \textit{ResNet} mreže, dodatno je konstruirana i jednostavna konvolucijska mreža za klasifikaciju \textit{CIFAR-10} slika. Mreža se sastoji od 11 slojeva, redom:
 \begin{enumerate}[noitemsep, label=\textbullet]
@@ -163,8 +163,24 @@ Model prijetnje (eng. \textit{threat model}) je proces kojim se potencijalne pri
 \end{table}
 
 \section{Pojava prvih neprijateljskih primjera}
-
-
+U uvodu je opisana osnovna ideja neprijateljskih primjera iz jednog od najranijih radova na temu neprijateljskih primjera\citep{Szegedy2014IntriguingPO}, a u nastavku je ideja dodatno razrađena i ukratko opisana optimizacijska metoda generiranja suparničkih primjera.
+\par
+Implicitno je pretpostavljeno da mreže imaju svojstvo lokalne generalizacije. Za neki dovoljno mali radijus $\epsilon > 0$ u blizini ulaza $x$ (epsilon okolina), postoji ulaz $x + r$ takav da je $||r|| < \epsilon$ koji će također imati veliku vjerojatnost pripadanja ispravnom klasifikacijskom razredu na izlazu mreže. Slabo vidljive promjene u pravilu ne mijenjaju drastično izlaz mreže, što se može i pokazati dodavanjem šuma na neku ulaznu sliku. Dapače, neke mreže su nasumičnom deformacijom ulaza pri treniranju povećavale robusnost modela. Pokazalo se da svojstvo lokalne generalizacije zapravo u velikoj mjeri nije prisutno kod tadašnjih (a i današnjih) modela dubokog učenja i da je moguće osmisliti optimizacijski proces koji će pronaći primjere sa slabo vidljivim promjenama koje ipak drastično mijenjaju izlaz mreže i prisile model na pogrešnu klasifikaciju. Dodatno, spomenuti oblik treniranja deformiranjem ulaza nije nimalo osporavao traženje neprijateljskih primjera.
+\par
+Slijedi formalni opis optimizacijskog problema koji je potrebno riješiti. \\
+Klasifikator koji na ulazu prima sliku, a na izlazu daje pripadnu labelu označen je s $f : \mathbb{R}^{m} \rightarrow \{1...k\}$. Pripadajuća funkcija gubitka definirana je s $loss_{f} : \mathbb{R}^{m}\times\{1...k\} \rightarrow \mathbb{R}^{+}$. Za neku sliku $x \in \mathbb{R}^{m}$ i neku labelu $l \in \{1...k\}$, potrebno je riješiti sljedeći optimizacijski problem:
+\begin{enumerate}[noitemsep, label=\textbullet]
+  \item minimizirati $||r||_{2}$ uz ograničenja
+  \begin{enumerate}
+  \item $f(x+r) = l$
+  \item $x + r \in [0, 1]^{m}$
+  \end{enumerate}
+\end{enumerate}
+Problem postaje netrivijalan za $f(x) \neq l$ i tražanje egzaktnog $r$ je težak problem. Autori su riješili približni problem:
+\begin{enumerate}[noitemsep, label=\textbullet]
+  \item minimizirati $c|r| + loss_{f}(x + r, l)$ uz ograničenje $x + r \in [0, 1]^{m}$
+\end{enumerate}
+Korištenjem iterativnog optimizacijskog algoritma L-BFGS (eng. \textit{Limited memory Broyden–Fletcher–Goldfarb–Shanno algorithm}) u svakoj iteraciji se minimizira $loss_{f}(x + r, l)$ te se dodatno linijskim pretraživanjem odredi i minimalni $c$ za koji je izlaz takav da je klasifikacija pogrešna. Za rad algoritma L-BFGS potrebno je unaprijed poznati i vrijednost gradijenta funkcije koja se optimizira, što ovaj napad čini napadom bijele kutije.
 \section{Brza metoda temeljena na gradijentima}\label{fgm}
 fg(s)m\citep{Goodfellow2015ExplainingAH}
 \section{DeepFool} df\citep{MoosaviDezfooli2016DeepFoolAS}
