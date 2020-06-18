@@ -187,8 +187,10 @@ fg(s)m\citep{Goodfellow2015ExplainingAH}
 
 
 \chapter{Obrana dubokih konvolucijskih modela I}
-\section{Naivne obrane}
+\section{Jednostavne obrane}
+U ovom dijelu je ukratko opisano nekoliko vrlo jednostavnih obrana. Dobra strana ovih obrana je što su iznimno jednostavne za implementirati i zapravo vrlo efektivne protiv već stvorenih neprijateljskih primjera, te nije potrebno nikakvo mijenjanje samog modela niti detaljno poznavanje potencijalnih metoda napada. Negativno je to što su pre-jednostavne da bi spriječile stvaranje novih neprijateljskih primjera te ne povećavaju robustnos mreže.
 \subsection{JPEG kompresija}
+
 \subsection{Gaussovo zaglađivanje}
 \section{Neprijateljsko treniranje - FGSM}
 \section{Termometar kodiranje}
@@ -207,57 +209,87 @@ fg(s)m\citep{Goodfellow2015ExplainingAH}
 \section{Budući rad}
 
 \chapter{Zaključak}
-Konvolucijske neuronske mreže su se pokazale iznimno uspješnima pri rješavanju problema klasifikacije slika. Međutim, pojava neprijateljskih primjera 
+Konvolucijske neuronske mreže su se pokazale iznimno uspješnima pri rješavanju problema klasifikacije slika. Međutim, pojava neprijateljskih primjera dovela je u pitanje tvrdnju da današnji modeli dobro generaliziraju. Također se ispostavilo da je vrlo lako osmisliti uspješne algoritme koji mogu generirati neprijateljske primjere, a za neke napade čak nije potrebno nikakvo dodatno znanje o mreži koju se napada. Ubrzo nakon pojave neprijateljskih primjera su se pojavile i prve potencijalne obrane. Iako su sve obrane na prvi pogled izgledale obećavajuće, pokazano je da većina tih obrana također ne mogu generalizirati na jače napade. Od svih obrana do sada, gotovo niti jedna obrana nije se pokazala korisnom. Najobećavajuća obrana do sada temelji se na posebnom obliku treniranja mreže korištenjem neprijateljskih primjera, no to je ono što tu obranu čini skupom i neuporabljivom na većim skupovima podataka kao što je \textit{ImageNet}. Budućnost obrana od neprijateljskih primjera još uvijek nije očita. Praktički svaki dan se pojavljuju sve efikasnije metode temeljene na suparničkom treniranju, formalni postupci koji mogu dokazati robustnost mreže te potpuno nove metode obrana koje će tek biti detaljno testirane. Međutim, danas obrana dubokih konvolucijskih modela još uvijek stoji kao vrlo izazovan i neriješen problem.
 
 
 \bibliography{literatura}
 \bibliographystyle{fer}
 
 \chapter{Dodatak}\label{dodatak}
-\section{Osobni skup slika}
-U \ref{ref_personal_image_table} je $16$ slika i labela koje su u radu korištene za generiranje suparničkih primjera za modele trenirane na \textit{ImageNet} skupu podataka. Sve slike su odabrane tako da spadaju unutar $1000$ razreda za koje su modeli predviđeni, dakle slike bi trebale biti ispravno klasficirane. Također, sve slike su unaprijed izrezane u oblik kvadrata kako ne bi došlo do prevelike degradacije kvalitete pri smanjenju rezolucije na $224\times224$. Ovim putem se zahvaljujem Sarah James na dopuštenju za korištenje slika u radu.
+\section{Osobni skup slika}\label{osobni_skup}
+U skupu slika \ref{ref_personal_image_table} je $16$ slika i labela koje su u radu korištene za generiranje suparničkih primjera za modele trenirane na \textit{ImageNet} skupu podataka. Sve slike su odabrane tako da spadaju unutar $1000$ razreda za koje su modeli predviđeni, dakle slike bi trebale biti ispravno klasficirane. Također, sve slike su unaprijed izrezane u oblik kvadrata kako ne bi došlo do prevelike degradacije kvalitete pri smanjenju rezolucije na $224\times224$. Ovim putem se zahvaljujem Sarah James na dopuštenju za korištenje slika u radu.
 
-\begin{figure}
+\section{Izlazi modela na nepromijenjenim slikama iz osobnog skupa}
+Slike iz \ref{osobni_skup} su birane tako da budu reprezentativne, odnosno da ne postoji mogućnost da su mreže "zbunjene" oko toga što je na slici. Ideja iza toga je pokazati kako je neprijateljske primjere lako konstruirati čak i kada je mreža iznimno sigurna u to što vidi na slici. U tablici \ref{regular_predictions} nalaze se top-1 izlazi mreža \textit{ResNet50 V2} (primarna mreža korištena kroz rad) i \textit{Xception}.
+\\
+\bgroup
+\def\arraystretch{1.2}
+\begin{table}[H]
+\begin{tabular}{|c | c | c|}
+\hline
+Slika & ResNet50 V2 & Xception \\ \hline
+\ref{ref_pi01} & African grey $100.00\%$ & African grey $100.00\%$  \\ \hline
+\ref{ref_pi02} & Backpack $99.71\%$ & Backpack $99.99\%$ \\ \hline
+\ref{ref_pi03} & Dragonfly $99.93\%$ & Dragonfly $99.79\%$ \\ \hline
+\ref{ref_pi04} & Bald eagle $87.47\%$ & Bald eagle $99.62\%$ \\  \hline
+\ref{ref_pi05} & Grocery store $90.81\%$ & Grocery store $97.68\%$ \\ \hline
+\ref{ref_pi06} & Gorilla $99.83\%$ & Gorilla $99.96\%$ \\ \hline
+\ref{ref_pi07} & Guinea pig $100.00\%$ & Guinea pig $99.99\%$ \\ \hline
+\ref{ref_pi08} & Jack-o'-lantern $100.00\%$ & Jack-o'-lantern $99.89\%$ \\ \hline
+\ref{ref_pi09} & Jigsaw puzzle $100.00\%$ & Jigsaw puzzle $100.00\%$ \\ \hline
+\ref{ref_pi10} & Computer keyboard $65.34\%$ & Computer keyboard $99.68\%$ \\ \hline
+\ref{ref_pi11} & Llama $100.00\%$ & Llama $100.00\%$ \\ \hline
+\ref{ref_pi12} & Meerket $99.98\%$ & Meerket $99.89\%$ \\ \hline
+\ref{ref_pi13} & English Springer $88.93\%$ & English Springer $99.30\%$ \\ \hline
+\ref{ref_pi14} & Running shoe $80.76\%$ & Running shoe $99.48\%$ \\ \hline
+\ref{ref_pi15} & Tabby $64.28\%$ & Tabby $89.72\%$ \\ \hline
+\ref{ref_pi16} & Wardrobe $87.16\%$ & Wardrobe $79.05\%$ \\ \hline
+\end{tabular}
+\caption{Tablica top-1 izlaza mreža ResNet50 V2 i Xception za slike iz \ref{osobni_skup}.}\label{regular_predictions}
+\end{table}
+\egroup
+
+\begin{figure}[H]
     \centering
     % images 1-4
     \subfloat[\textit{African grey} (87)]{
-        \label{ref_pi1}
+        \label{ref_pi01}
         \includegraphics[width=0.25\textwidth]{img/personal_images/african_grey.jpg}
     }
     \subfloat[\textit{Backpack} (414)]{
-        \label{ref_pi2}
+        \label{ref_pi02}
         \includegraphics[width=0.25\textwidth]{img/personal_images/backpack.jpg}
     }
     \subfloat[\textit{Dragonfly} (319)]{
-        \label{ref_pi3}
+        \label{ref_pi03}
         \includegraphics[width=0.25\textwidth]{img/personal_images/dragonfly.jpg}
     }
     \subfloat[\textit{Bald eagle} (22)]{
-        \label{ref_pi4}
+        \label{ref_pi04}
         \includegraphics[width=0.25\textwidth]{img/personal_images/eagle.jpg}
     }
     \newline
     % images 5-8
     \subfloat[\textit{Grocery store} (582)]{
-        \label{ref_pi5}
+        \label{ref_pi05}
         \includegraphics[width=0.25\textwidth]{img/personal_images/food_market.jpg}
     }
     \subfloat[\textit{Gorilla} (366)]{
-        \label{ref_pi6}
+        \label{ref_pi06}
         \includegraphics[width=0.25\textwidth]{img/personal_images/gorilla.jpg}
     }
     \subfloat[\textit{Guinea pig} (338)]{
-        \label{ref_pi7}
+        \label{ref_pi07}
         \includegraphics[width=0.25\textwidth]{img/personal_images/guinea_pig.jpg}
     }
     \subfloat[\textit{Jack-o'-lantern} (607)]{
-        \label{ref_pi8}
+        \label{ref_pi08}
         \includegraphics[width=0.25\textwidth]{img/personal_images/jackolantern.jpg}
     }
     \newline
     % images 9-12
     \subfloat[\textit{Jigsaw puzzle} (611)]{
-        \label{ref_pi9}
+        \label{ref_pi09}
         \includegraphics[width=0.25\textwidth]{img/personal_images/jigsaw2.jpg}
     }
     \subfloat[\textit{Keypad} (508)]{
@@ -295,20 +327,17 @@ U \ref{ref_personal_image_table} je $16$ slika i labela koje su u radu korišten
     \label{ref_personal_image_table}
 \end{figure}
 
-\section{Izlazi modela na nepromijenjenim slikama iz osobnog skupa}
-
-
 
 \begin{sazetak}
-Današnji konvolucijski modeli postižu visoku točnost u području raspoznavanja objekata. Način rada dubokih modela je još uvijek vrlo teško ili nemoguće interpretirati, a dodatan razlog za brigu predstavljaju i nedavno otkriveni neprijateljski primjeri. Neprijateljski primjeri su slike s dodatnim teško uočljivim perturbacijama koje potiču model na pogrešnu klasifikaciju. Pokazalo se da je vrlo lagano konstruirati brze i efikasne napade na postojeće modele, međutim  ubrzo su se pojavile i obrane protiv takvih napada. Ti početni napadi su se oslanjali na pristup mreži i poznavanju arhitekture, a obrane od takvih napada se temelje na "prikrivanju" potrebnih informacija, kao što su gradijenti.
+Današnji konvolucijski modeli postižu visoku točnost u području raspoznavanja objekata. Način rada dubokih modela je još uvijek vrlo teško ili nemoguće interpretirati, a dodatan razlog za brigu predstavljaju i takozvani neprijateljski primjeri. Neprijateljski primjeri su slike s dodanim teško uočljivim perturbacijama koje potiču model na pogrešnu klasifikaciju. Pokazalo se da je vrlo lagano konstruirati brze i efikasne napade na postojeće modele, nakon čega su se ubrzo pojavile i obrane protiv takvih napada. Nedugo nakon toga pojavljuju se sve jači napadi, dok su obrane stagnirale te danas još uvijek ne postoji zadovoljavajuća obrana protiv neprijateljksih napada. U radu je dan pregled spomenutih jednostavnih napada i jednostavnih obrana, istaknuta je neuspješnost jednostavnih obrana protiv jačih napada te je opisana obećavajuća obrana koja se temelji na treniranju mreže korištenjem neprijateljskih primjera.
 
-\kljucnerijeci{duboko učenje, klasifikacija, konvolucijske neuronske mreže, računalni vid, suparnički primjeri, neprijateljski primjeri, obrana.}
+\kljucnerijeci{klasifikacija objekata, konvolucijske neuronske mreže, računalni vid, suparnički primjeri, neprijateljski primjeri, obrana}
 \end{sazetak}
-
+\pagebreak
 \engtitle{Defending Deep Convolutional Models from Adversarial Examples}
 \begin{abstract}
-Deep neural networks can achieve very high accuracy in many applications such as image classification. However, most of these deep models are difficult to interpret and they are often sensitive to the so-called adversarial examples. This feature opens up the possibility of maliciously designing adversarial examples that could deceive a deep learning system. 
+Today's convolutional models can achieve high accuracy in the field of object recognition. The way deep models work is still very difficult or impossible to interpret, and an additional reason for concern are the so-called adversarial examples. Adversarial examples are images with added imperceptible perturbations that encourage the model to misclassify the image. It turned out to be very easy to construct fast and effective attacks on existing models, after which new defenses against these attacks also appeared. Soon afterwards even stronger attacks appeared, while new defenses stagnated and today there isn't a satisfactory defense against adversarial attacks. The thesis reviews the aforementioned simple attacks and simple defenses, pointing out the failure of simple defenses against strong attackers. Additionally, a promising defense is described. The defense is based on the concept of adversarial training and has shown good results.
 
-\keywords{deep learning, classification, convolutional neural networks, computer vision, adversarial attacks, defense.}
+\keywords{object classification, convolutional neural networks, computer vision, adversarial attacks, defense}
 \end{abstract}
 \end{document}
