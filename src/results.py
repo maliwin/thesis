@@ -6,7 +6,7 @@
 # images, predictions, values
 from util import *
 preload_tensorflow()
-from adversarial_attacks import *
+# from adversarial_attacks import *
 
 
 def save_adversarial_images(images, name):

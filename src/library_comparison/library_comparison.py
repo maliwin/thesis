@@ -71,7 +71,7 @@ def cleverhans_example():
 
 
 def art_example():
-    from art.attacks.evasion import FastGradientMethod, DeepFool
+    from art.attacks.evasion import FastGradientMethod
     from art.classifiers import TensorFlowV2Classifier
 
     def _art_example_tf():
@@ -80,8 +80,7 @@ def art_example():
         t1 = time.time()
         model_art = TensorFlowV2Classifier(model=probability_model, loss_object=model.loss,
                                            nb_classes=10, input_shape=(32, 32, 3), clip_values=(0, 1))
-        # attack = FastGradientMethod(model_art, eps=0.01)
-        attack = DeepFool(model_art)
+        attack = FastGradientMethod(model_art, eps=0.01)
         adversarials = attack.generate(x=np.array([x_test[0]]), x_adv_init=None)
         print('ART time: ' + str(time.time() - t1))
 
