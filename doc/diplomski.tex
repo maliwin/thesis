@@ -209,7 +209,19 @@ uspješnost u ovisnosti o epsilonu \\
 transferabilnost \\
 fgm adversarial uvod 
 \section{DeepFool} df\citep{MoosaviDezfooli2016DeepFoolAS}
-
+Algoritmi FGM uspješno nalaze neprijateljske primjere iz jednog pokušaja. Očito je da bi neka iterativna metoda sigurno pronašla neprijateljske primjere s još manjim perturbacijama.
+\par
+$2016.$ godine se pojavljuje sljedeći bitan algoritam stvaranja neprijateljskih primjera: DeepFool.\\
+DeepFool je iterativni algoritam baziran na modelu bijele kutije. Kao i FGM, DeepFool iskorištava svojstvo prevelike linearnosti modela te u svakom koraku aproksimira nelinearni klasifikator na linearan način. Slijedi opis rada DeepFool algoritma na binarnom klasifikatoru. \\
+Za neki klasifikator $f$ i izlaznu, izlazna labela za neki ulaz $\boldsymbol{x}$ označena je s $\hat{k}(\boldsymbol{x})$. Minimalna perturbacija $\boldsymbol{r}$ je ona koja je dovoljna da promijeni vrijednost $\hat{k}(\boldsymbol{x})$:
+\begin{equation}
+	\Delta (\boldsymbol{x}; \hat{k}) := \mathop{min}_{\boldsymbol{r}} ||\boldsymbol{r}||_{2} \text{ uz uvjet } \hat{k}(\boldsymbol{x}+\boldsymbol{r}) \neq \hat{k}(\boldsymbol{x})
+\end{equation}
+Minimalna perturbacija potrebna za pogrešnu klasifikaciju nekog uzorka se također naziva i robustnost $\hat{k}$ u točki $\boldsymbol{x}$. Usput se može i definirati robustnost cijelog modela:
+\begin{equation}
+	\rho_{adv}(\hat{k}) = \mathbb{E}_{\boldsymbol{x}} \frac{\Delta (\boldsymbol{x}; \hat{k})}{||\boldsymbol{x}||_{2}} 
+\end{equation}
+Riječima, robustnost nekog klasifikatora je očekivana potrebna perturbacija za stvaranje neprijateljskog primjera preko (nekog) cijelog skupa podataka. 
 
 \chapter{Obrana dubokih konvolucijskih modela I}
 \section{Jednostavne obrane}

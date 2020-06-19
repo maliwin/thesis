@@ -66,10 +66,10 @@ def deepfool_cifar10():
 if __name__ == '__main__':
     # TODO: just switch to cifar10, imagenet is too slow for deepfool
     model, art_model, images, preprocessed_images, \
-    correct_labels, preprocess_input, decode_predictions = setup_imagenet_model()
+    correct_labels, preprocess_input, decode_predictions = setup_imagenet_model(classifier_activation=None)
 
     # note:
-    images1, predictions = deepfool(art_model, images, eps=5, max_iter=1)
+    images1, predictions = deepfool(art_model, images[3:5], eps=0.02, max_iter=50)
     y_pred = np.argmax(predictions, axis=1)
     adv, not_adv = split_correct_classification(images1, y_pred, correct_labels)
 

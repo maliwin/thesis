@@ -71,7 +71,8 @@ def get_untrained_model_tf(input_shape=(32, 32, 3)):
     return model, probability_model
 
 
-def setup_imagenet_model(which='resnet50v2', img_range=255, preprocessing_defences=None, postprocessing_defences=None):
+def setup_imagenet_model(which='resnet50v2', img_range=255,
+                         classifier_activation='softmax', preprocessing_defences=None, postprocessing_defences=None):
     from art.classifiers import TensorFlowV2Classifier
 
     assert img_range in (1, 255)
@@ -80,13 +81,13 @@ def setup_imagenet_model(which='resnet50v2', img_range=255, preprocessing_defenc
 
     def _setup_resnetv2_50():
         from tensorflow.keras.applications.resnet_v2 import ResNet50V2, preprocess_input, decode_predictions
-        model = ResNet50V2()
+        model = ResNet50V2(classifier_activation=classifier_activation)
         art_preprocessing = preprocessing_art_tuple('tf')
         return model, art_preprocessing, preprocess_input, decode_predictions
 
     def _setup_mobilenetv2():
         from tensorflow.keras.applications.mobilenet_v2 import MobileNetV2, preprocess_input, decode_predictions
-        model = MobileNetV2()
+        model = MobileNetV2(classifier_activation=classifier_activation)
         art_preprocessing = preprocessing_art_tuple('tf')
         return model, art_preprocessing, preprocess_input, decode_predictions
 
@@ -102,7 +103,7 @@ def setup_imagenet_model(which='resnet50v2', img_range=255, preprocessing_defenc
         # NB: preprocess_input converts RGB to BGR on its own ! ! !
         #     however, art DOESN'T and we have to pass it a BGR image that has *not* been preprocessed
         #     (because it does it on it's own too)
-        model = VGG16()
+        model = VGG16(classifier_activation=classifier_activation)
         art_preprocessing = preprocessing_art_tuple('caffe')
         return model, art_preprocessing, preprocess_input, decode_predictions
 
@@ -112,14 +113,14 @@ def setup_imagenet_model(which='resnet50v2', img_range=255, preprocessing_defenc
         # NB: preprocess_input converts RGB to BGR on its own ! ! !
         #     however, art DOESN'T and we have to pass it a BGR image that has *not* been preprocessed
         #     (because it does it on it's own too)
-        model = VGG19()
+        model = VGG19(classifier_activation=classifier_activation)
         art_preprocessing = preprocessing_art_tuple('caffe')
         return model, art_preprocessing, preprocess_input, decode_predictions
 
     def _setup_xception_deprecated():
         # deprecated because it's 299, it's easier to just do 224 on all of them
         from tensorflow.keras.applications.xception import Xception, preprocess_input, decode_predictions
-        model = Xception()
+        model = Xception(classifier_activation=classifier_activation)
         art_preprocessing = (127.5, 127.5)
         return model, art_preprocessing, preprocess_input, decode_predictions
 
