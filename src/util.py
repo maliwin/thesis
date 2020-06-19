@@ -382,6 +382,22 @@ def setup_logging():
     logger.addHandler(handler)
 
 
+def get_some_imagenet_set():
+    import torchvision.datasets as datasets
+    import torchvision.transforms as transforms
+
+    val = datasets.ImageFolder(
+        ROOT_DIR + '/../data/imagenet_validation',
+        transforms.Compose([
+            transforms.Resize(256, Image.BICUBIC),
+            transforms.CenterCrop(224),
+        ]))
+
+    x = np.array([np.array(img[0]) for img in val]).astype(np.float32)
+    y = np.array(val.targets)
+    return x, y
+
+
 if __name__ == '__main__':
     setup_cifar10_model(69)
     # preload_tensorflow()

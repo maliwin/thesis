@@ -180,9 +180,34 @@ Problem postaje netrivijalan za $f(x) \neq l$ i tražanje egzaktnog $r$ je teža
 \begin{enumerate}[noitemsep, label=\textbullet]
   \item minimizirati $c|r| + loss_{f}(x + r, l)$ uz ograničenje $x + r \in [0, 1]^{m}$
 \end{enumerate}
-Korištenjem iterativnog optimizacijskog algoritma L-BFGS (eng. \textit{Limited memory Broyden–Fletcher–Goldfarb–Shanno algorithm}) u svakoj iteraciji se minimizira $loss_{f}(x + r, l)$ te se dodatno linijskim pretraživanjem odredi i minimalni $c$ za koji je izlaz takav da je klasifikacija pogrešna. Za rad algoritma L-BFGS potrebno je unaprijed poznati i vrijednost gradijenta funkcije koja se optimizira, što ovaj napad čini napadom bijele kutije.
+Korištenjem iterativnog optimizacijskog algoritma L-BFGS (eng. \textit{Limited memory Broyden–Fletcher–Goldfarb–Shanno algorithm}) u svakoj iteraciji se minimizira $loss_{f}(x + r, l)$ te se dodatno linijskim pretraživanjem odredi i minimalni $c$ za koji je izlaz takav da je klasifikacija pogrešna. Za rad algoritma L-BFGS potrebno je unaprijed poznati i vrijednost gradijenta funkcije koja se optimizira, što ovaj napad čini napadom bijele kutije. \par
+Jedno od ponuđenih objašnjenja postojanja neprijateljskih primjera je to što su konvolucijske mreže vrlo nelinearne po prirodi. To je zapravo poželjno svojstvo dubokih mreža, jer nelinearnost omogućuje rješavanje vrlo nelinearnih optimizacijskih problema kao što je klasifikacija slika. No čini se da je upravo zbog toliko visoke nelinearnosti lako za pronaći neprijateljske primjere koji su se sakrili u "džepovima" u blizini nekog ulaza, koje je vrlo teško pronaći nasumičnim pretraživanjem. 
 \section{Brza metoda temeljena na gradijentima}\label{fgm}
-fg(s)m\citep{Goodfellow2015ExplainingAH}
+Iako su neprijateljski primjeri otkriveni već krajem $2013.$, idući bitni rad na temu neprijateljskih primjera pojavio se tek $2015.$ godine\citep{Goodfellow2015ExplainingAH}. Taj rad je direktni nastavak na prethodni te nudi nove načine generiranja neprijateljskih načina, jedno novo bitno i zanimljivo svojstvo neprijateljskih primjera te potpuno novo i neočekivano objašnjenje postojanja neprijateljskih primjera.
+\par
+Neprijateljski primjeri su se originalno pojavili pod pretpostavkom da su duboki modeli previše nelinearni te je njihovo postojanje objašnjenjo teorijom da modeli imaju "slijepe pjege" u kojima se neprijateljski primjeri teško pronalaze. \\
+Usprkos tome što je prethodno ponuđeno objašnjenje postojanja neprijateljskih primjera vrlo logično, sljedeći napad je osmišljen počevši od potpuno obrnute pretpostavke.
+\par
+Ispostavilo se i da su linearni modeli podložni neprijateljskim primjerima, stoga je prvo potrebno objasniti kako je to moguće. \\
+Digitalne slike uglavnom koriste samo 8 bitova za reprezentaciju pojedinog piksela, i svaka dodatna informacija manja od $1/255$ je odbačena. Razumno je za očekivati da klasifikator nema različit izlaz za $\boldsymbol{x}$ i $\boldsymbol{\tilde{x}} = \boldsymbol{x} + \boldsymbol{\eta}$, ako je svaki element perturbacije $\boldsymbol{\eta}$ manji od spomenute preciznosti. Formalnije, klasifikator bi trebao dati isti izlaz za $\boldsymbol{x}$ i $\boldsymbol{\tilde{x}}$ dokle god je $||\boldsymbol{\eta}||_{\infty} < \epsilon$, gdje je $\epsilon$ dovoljno mal da bude odbačen. \\
+Skalarni umnožak vektora težina $\boldsymbol{w}^{T}$ i primjera s perturbacijom $\boldsymbol{\tilde{x}}$ može se raspisati ovako:
+\begin{equation}
+	\boldsymbol{w}^{T}\boldsymbol{\tilde{x}} = \boldsymbol{w}^{T}\boldsymbol{x} + \boldsymbol{w}^{T}\boldsymbol{\eta}
+\end{equation}
+Dakle, perturbacija $\boldsymbol{\eta}$ uzrokuje porast aktivacije za $\boldsymbol{w}^{T}\boldsymbol{\eta}$. Ovaj porast se može maksimizirati postavljanjem $\boldsymbol{\eta} = \epsilon sign(\boldsymbol{w})$. Ako je prosječna vrijednost vektora težina $m$, onda je porast iznosa $\epsilon mn$. Norma $||\boldsymbol{\eta}||_{\infty}$ ne raste s porastom dimenzionalnosti problema, dok porast aktivacije raste linearno s $n$. Dakle, za visoko dimenzionalne probleme moguće je dodati nevidljive promjene koje onda zajedno mogu drastično promijeniti izlaz.
+\par
+Ideja je zato napasti klasifikator "gdje najviše boli". Potrebno je maksimizirati promjenu izlaza uz minimalnu promjenu svakog pojedinačnog elementa. Za nelinearne modele, ideja je identična: \\
+ako su $\boldsymbol{\theta}$ parametri modela, $\boldsymbol{x}$ ulaz, $y$ izlaz te $J(\boldsymbol{\theta}, \boldsymbol{x}, y)$ funkcija gubitka korištena za treniranje mreže, maksimalna perturbacija za koju je uvjet norme zadovoljen je:
+\begin{equation}
+	\boldsymbol{\eta} = \epsilon sign(\nabla_{x}J(\boldsymbol{\theta}, \boldsymbol{x}, y))
+\end{equation}
+Ova metoda generiranja neprijateljskih primjera se zove metoda temeljena na predznaku gradijenta (eng. \textit{fast gradient sign method}). Metoda je brza jer je potreban samo jedan pristup mreži, i također je napad na bijelu kutiju.
+Činjenica da je nelinearne klasifikatore moguće napasti s istom pretpostavkom kao i linearne, te da su nelinearni modeli jednako podložni neprijateljskim napadima kao i linearni modeli dodatno dokazuje da problem nije to što su duboki modeli previše nelinearni, nego to da su previše linearni. Na sličan način se može dobiti maksimalna perturbacija pod uvjetima normi $1$ i $2$. Ne uzme se funkcija predznaka $sign$ nego je potrebno gradijent podijeliti s određenim faktorom koji osigurava da uvjet norme ostane zadovoljen. Ovako proširena skupina neprijateljskih napada se zove brza metoda temeljena na gradijentima (eng. \textit{fast gradient method}). \\
+Slijedi nekoliko primjera napada na model \textit{ResNet50}. \\
+slike \\
+uspješnost u ovisnosti o epsilonu \\
+transferabilnost \\
+fgm adversarial uvod 
 \section{DeepFool} df\citep{MoosaviDezfooli2016DeepFoolAS}
 
 
