@@ -12,6 +12,7 @@
 \usepackage{float}
 \usepackage{tabularx}
 \usepackage{enumitem}
+\usepackage{mathrsfs}
 
 
 \begin{document}
@@ -139,9 +140,9 @@ Model prijetnje (eng. \textit{threat model}) je proces kojim se potencijalne pri
 
 \begin{figure}[H]
   \centering
-  \subfloat[Lažno pozitivni napad. Mreža klasificra sliku kao prostirka za molitvu (eng. \textit{prayer rug}) s vjerojatnošću $98.66\%$.]{\includegraphics[width=0.48\textwidth]{img/results/prayer_rug_98.66_resnet_cw.png}\label{fig:a}}
+  \subfloat[Lažno pozitivni napad. Mreža klasificra sliku kao prostirka za molitvu (eng. \textit{prayer rug}) s vjerojatnošću $98.66\%$.]{\includegraphics[width=0.48\textwidth]{img/results/prayer_rug_98-66_resnet_cw.png}\label{fig:a}}
   \hfill
-  \subfloat[Lažno negativni napad. Mreža klasificra sliku kao zmaj (eng. \textit{kite}) s vjerojatnošću $91.89\%$.]{\includegraphics[width=0.48\textwidth]{img/results/kite_91.89_resnet_cw.png}\label{fig:b}}
+  \subfloat[Lažno negativni napad. Mreža klasificra sliku kao zmaj (eng. \textit{kite}) s vjerojatnošću $91.89\%$.]{\includegraphics[width=0.48\textwidth]{img/results/kite_91-89_resnet_cw.png}\label{fig:b}}
   \caption{Primjeri lažno pozitivnog i lažno negativnog napada. Napad proveden na \textit{ResNet50V2} mreži korištenjem \textit{Carlini and Wagner} $\ell_{2}$ napada opisanog u \ref{x}.}
 \end{figure}\label{fig:fp_fn}
 
@@ -221,11 +222,33 @@ Minimalna perturbacija potrebna za pogrešnu klasifikaciju nekog uzorka se tako�
 \begin{equation}
 	\rho_{adv}(\hat{k}) = \mathbb{E}_{\boldsymbol{x}} \frac{\Delta (\boldsymbol{x}; \hat{k})}{||\boldsymbol{x}||_{2}} 
 \end{equation}
-Riječima, robustnost nekog klasifikatora je očekivana potrebna perturbacija za stvaranje neprijateljskog primjera preko (nekog) cijelog skupa podataka. 
+Riječima, robustnost nekog klasifikatora je očekivana potrebna perturbacija za stvaranje neprijateljskog primjera preko (nekog) cijelog skupa podataka. \\
+Za binarni klasifikator $f(\boldsymbol{x})$ se pretpostavlja da vrijedi $\hat{k}(\boldsymbol{x}) = sign(f(\boldsymbol{x}))$. Dodatno se definira skup $\mathscr{F} :=  {\boldsymbol{x} : f(\boldsymbol{x}) = 0}$ -- skup vektora $\boldsymbol{x}$ za koje je izlaz klasifikatora $0$. \\
+Za klasifikator oblika $f(\boldsymbol{x}) = \boldsymbol{w}^{T}\boldsymbol{x} + b$ robustnos u točki $\boldsymbol{x_{0}}$ je jednaka udaljenosti od $\boldsymbol{x_{0}}$ do hiperravnine definirane s $\mathscr{F} = {\boldsymbol{x} : \boldsymbol{w}^{T}\boldsymbol{x}+b=0}$. Ovo je prikazano na slici \ref{fig:hyperplane_dist}. \\
+Prema tome, da bi se klasifikacija promijenila, potrebna je perturbacija koja će točku $\boldsymbol{x} = \boldsymbol{x}_{0} + \boldsymbol{r}$ staviti na drugu stranu hiperravnine. Minimalna takva perturbacija jednaka je ortogonalnoj projekciji $\boldsymbol{x}_{0}$ na ravninu $\mathscr{F}$. Ova projekcija može se izračunati u zatvorenom obliku:
+\begin{equation}
+	\boldsymbol{r}(\boldsymbol{x_{0}}) := - \frac{f(\boldsymbol{x_{0}})}{||\boldsymbol{w}||_{2}^{2}}\boldsymbol{w}
+\end{equation}
+U generalnom slučaju za bilokakav diferencijabilni klasifikator ne može se vrijednost perturbacije izračunati u zatvorenom obliku. Ovdje se ponovno iskorištava svojstvo klasifikatora da su previše linearni, te se u svakoj iteraciji klasifikator $f$ linearizira u točki $\boldsymbol{x_{i}}$. Minimalna perturbacija takvog linearnog klasifikatora u koraku $i$ računa se na sljedeći način:
+\begin{equation}
+	\mathop{argmin}_{\boldsymbol{r}_{i}}||\boldsymbol{r}_{i}||_{2} \text{ uz uvjet } f(\boldsymbol{x}_{i}) + \nabla f(\boldsymbol{x}_{i})^{T}\boldsymbol{r}_{i} = 0
+\end{equation}
+Izraz uvjeta predstavlja tangencijalnu hiperravninu na funkciju klasifikatora. Algoritam opisan riječima bi glasio ovako: u svakom koraku algoritma radi se ortogonalna projekcija trenutne točke na tangencijalnu ravninu klasifikatora. Algoritam se ponavlja dokle god klasifikator ne pogriješi, odnosno dokle god točka ne dođe na granicu klasifikatora. Ilustracija iz rada prikana na [slika] vizualno opisuje jedan korak algoritma. \\
+Pošto se višerazredni klasifikator može promatrati kao skupina binarnih klasifikatora, algoritam je moguće poopćiti na višerazredne klasifikatore. \\
+Pošto je i za rad ovog algoritma potrebo znanje o mreži, ovo je također napad na model bijele kutije. DeepFool pronalazi daleko bolje neprijateljske primjere s daleko manjim perturbacijama. Slijedi nekoliko primjera napada na ResNet50 mrežu.\\
+slike
+
 
 \chapter{Obrana dubokih konvolucijskih modela I}
+Do sada je predstavljeno nekoliko napada. Originalni napad temeljen na minimizaciji približnog problema uz pomoć L-BFGS algoritam je opisan zbog povijesnih razloga. Napad nije u primjeni jer je u praksi vrlo spor i ne daje dobre rezultate. Međutim, pojavilo se mnoštvo potencijalnih obrana od dosadašnjih napada. U ovom poglavlju su opisane tri glavne kategorije takvih obrana na primjeru pojedinačnih obrana: 
+\begin{enumerate}[noitemsep, label=\textbullet]
+\item Jednostavne obrane -- konceptualno vrlo jednostavne za shvatiti, nije potrebno duboko predznanje o napadima, "jeftine" za implementirati
+\item Neprijateljsko treniranje -- poboljšanje robustnosti klasifikatora još pri treniranju
+\item Prikrivanje gradijenata -- vođeni idejom povećanja nelinearnosti mreže, određeni napadi namjerno ili slučajno "prikrivaju" gradijente mreže i time prividno sprječavaju napade temeljene na gradijentima
+\end{enumerate}
+
 \section{Jednostavne obrane}
-U ovom dijelu je ukratko opisano nekoliko vrlo jednostavnih obrana. Dobra strana ovih obrana je što su iznimno jednostavne za implementirati i zapravo vrlo efektivne protiv već stvorenih neprijateljskih primjera, te nije potrebno nikakvo mijenjanje samog modela niti detaljno poznavanje potencijalnih metoda napada. Negativno je to što su pre-jednostavne da bi spriječile stvaranje novih neprijateljskih primjera te ne povećavaju robustnos mreže.
+U ovom dijelu je ukratko opisano nekoliko vrlo jednostavnih obrana. Dobra strana ovih obrana je što su iznimno jednostavne za implementirati i vrlo efektivne protiv već stvorenih neprijateljskih primjera, te nije potrebno nikakvo mijenjanje samog modela niti detaljno poznavanje potencijalnih metoda napada. Negativno je to što su pre-jednostavne da bi spriječile stvaranje novih neprijateljskih primjera te ne povećavaju robustnos mreže. Općenito, obrane koje su "agnostične" što se tiče modela kojeg brane (nezavisne su od modela) su se pokazale vrlo neuspješnima.
 \subsection{JPEG kompresija}
 
 \subsection{Gaussovo zaglađivanje}
