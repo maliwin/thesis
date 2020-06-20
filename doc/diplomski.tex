@@ -209,7 +209,7 @@ slike \\
 uspješnost u ovisnosti o epsilonu \\
 transferabilnost \\
 fgm adversarial uvod 
-\section{DeepFool} df\citep{MoosaviDezfooli2016DeepFoolAS}
+\section{DeepFool}
 Algoritmi FGM uspješno nalaze neprijateljske primjere iz jednog pokušaja. Očito je da bi neka iterativna metoda sigurno pronašla neprijateljske primjere s još manjim perturbacijama.
 \par
 $2016.$ godine se pojavljuje sljedeći bitan algoritam stvaranja neprijateljskih primjera: DeepFool.\\
@@ -222,19 +222,28 @@ Minimalna perturbacija potrebna za pogrešnu klasifikaciju nekog uzorka se tako�
 \begin{equation}
 	\rho_{adv}(\hat{k}) = \mathbb{E}_{\boldsymbol{x}} \frac{\Delta (\boldsymbol{x}; \hat{k})}{||\boldsymbol{x}||_{2}} 
 \end{equation}
-Riječima, robustnost nekog klasifikatora je očekivana potrebna perturbacija za stvaranje neprijateljskog primjera preko (nekog) cijelog skupa podataka. \\
-Za binarni klasifikator $f(\boldsymbol{x})$ se pretpostavlja da vrijedi $\hat{k}(\boldsymbol{x}) = sign(f(\boldsymbol{x}))$. Dodatno se definira skup $\mathscr{F} :=  {\boldsymbol{x} : f(\boldsymbol{x}) = 0}$ -- skup vektora $\boldsymbol{x}$ za koje je izlaz klasifikatora $0$. \\
-Za klasifikator oblika $f(\boldsymbol{x}) = \boldsymbol{w}^{T}\boldsymbol{x} + b$ robustnos u točki $\boldsymbol{x_{0}}$ je jednaka udaljenosti od $\boldsymbol{x_{0}}$ do hiperravnine definirane s $\mathscr{F} = {\boldsymbol{x} : \boldsymbol{w}^{T}\boldsymbol{x}+b=0}$. Ovo je prikazano na slici \ref{fig:hyperplane_dist}. \\
+Robustnost nekog klasifikatora definirana je kao očekivana potrebna perturbacija za stvaranje neprijateljskog primjera preko (nekog) cijelog skupa podataka. \\
+Za binarni klasifikator $f(\boldsymbol{x})$ se pretpostavlja da vrijedi $\hat{k}(\boldsymbol{x}) = sign(f(\boldsymbol{x}))$. Dodatno se definira skup $\mathscr{F} := \{\boldsymbol{x} : f(\boldsymbol{x}) = 0\}$ -- skup vektora $\boldsymbol{x}$ za koje je izlaz klasifikatora $0$. \\
+Za klasifikator oblika $f(\boldsymbol{x}) = \boldsymbol{w}^{T}\boldsymbol{x} + b$ robustnos u točki $\boldsymbol{x_{0}}$ je jednaka udaljenosti od $\boldsymbol{x_{0}}$ do hiperravnine definirane s $\mathscr{F} = \{\boldsymbol{x} : \boldsymbol{w}^{T}\boldsymbol{x}+b=0\}$. Ovo je prikazano na slici \ref{fig:hyperplane_dist}. \\
 Prema tome, da bi se klasifikacija promijenila, potrebna je perturbacija koja će točku $\boldsymbol{x} = \boldsymbol{x}_{0} + \boldsymbol{r}$ staviti na drugu stranu hiperravnine. Minimalna takva perturbacija jednaka je ortogonalnoj projekciji $\boldsymbol{x}_{0}$ na ravninu $\mathscr{F}$. Ova projekcija može se izračunati u zatvorenom obliku:
 \begin{equation}
 	\boldsymbol{r}(\boldsymbol{x_{0}}) := - \frac{f(\boldsymbol{x_{0}})}{||\boldsymbol{w}||_{2}^{2}}\boldsymbol{w}
 \end{equation}
 U generalnom slučaju za bilokakav diferencijabilni klasifikator ne može se vrijednost perturbacije izračunati u zatvorenom obliku. Ovdje se ponovno iskorištava svojstvo klasifikatora da su previše linearni, te se u svakoj iteraciji klasifikator $f$ linearizira u točki $\boldsymbol{x_{i}}$. Minimalna perturbacija takvog linearnog klasifikatora u koraku $i$ računa se na sljedeći način:
 \begin{equation}
-	\mathop{argmin}_{\boldsymbol{r}_{i}}||\boldsymbol{r}_{i}||_{2} \text{ uz uvjet } f(\boldsymbol{x}_{i}) + \nabla f(\boldsymbol{x}_{i})^{T}\boldsymbol{r}_{i} = 0
+	\mathop{\text{arg min}}_{\boldsymbol{r}_{i}}||\boldsymbol{r}_{i}||_{2} \text{ uz uvjet } f(\boldsymbol{x}_{i}) + \nabla f(\boldsymbol{x}_{i})^{T}\boldsymbol{r}_{i} = 0
 \end{equation}
 Izraz uvjeta predstavlja tangencijalnu hiperravninu na funkciju klasifikatora. Algoritam opisan riječima bi glasio ovako: u svakom koraku algoritma radi se ortogonalna projekcija trenutne točke na tangencijalnu ravninu klasifikatora. Algoritam se ponavlja dokle god klasifikator ne pogriješi, odnosno dokle god točka ne dođe na granicu klasifikatora. Ilustracija iz rada prikana na [slika] vizualno opisuje jedan korak algoritma. \\
 Pošto se višerazredni klasifikator može promatrati kao skupina binarnih klasifikatora, algoritam je moguće poopćiti na višerazredne klasifikatore. \\
+
+\begin{figure}[H]
+  \centering
+  \subfloat[Linearni binarni klasifikator. Minimalna perturbacija potrebna za promijeniti izlaz klasifikatora je ortogonalna projekcija na pravac koji dijeli razrede.]{\includegraphics[width=0.49\textwidth]{img/other/deepfool_linear_binary.png}\label{fig:deepfool_1d}}
+  \hfill
+  \subfloat[Diferencijabilni binarni klasifikator. U svakom koraku se trenutnu točku aproksimira funkcija klasifikatora s hiperravninom i napravi projekcija na pravac koji siječe $\mathbb{R}^{n}$ (narančaste boje).]{\includegraphics[width=0.49\textwidth]{img/other/deepfool_differential_binary.png}\label{fig:deepfool_2d}}
+  \caption{Ilustracija rada DeepFool algoritma na binarnim klasifikatorima.}
+\end{figure}\label{fig:deepfool_illustrations}
+
 Pošto je i za rad ovog algoritma potrebo znanje o mreži, ovo je također napad na model bijele kutije. DeepFool pronalazi daleko bolje neprijateljske primjere s daleko manjim perturbacijama. Slijedi nekoliko primjera napada na ResNet50 mrežu.\\
 slike
 
@@ -248,10 +257,27 @@ Do sada je predstavljeno nekoliko napada. Originalni napad temeljen na minimizac
 \end{enumerate}
 
 \section{Jednostavne obrane}
-U ovom dijelu je ukratko opisano nekoliko vrlo jednostavnih obrana. Dobra strana ovih obrana je što su iznimno jednostavne za implementirati i vrlo efektivne protiv već stvorenih neprijateljskih primjera, te nije potrebno nikakvo mijenjanje samog modela niti detaljno poznavanje potencijalnih metoda napada. Negativno je to što su pre-jednostavne da bi spriječile stvaranje novih neprijateljskih primjera te ne povećavaju robustnos mreže. Općenito, obrane koje su "agnostične" što se tiče modela kojeg brane (nezavisne su od modela) su se pokazale vrlo neuspješnima.
+U ovom dijelu je ukratko opisano nekoliko vrlo jednostavnih obrana. Dobra strana ovih obrana je što su iznimno jednostavne za implementirati i vrlo efektivne protiv već stvorenih neprijateljskih primjera, te nije potrebno nikakvo mijenjanje samog modela niti detaljno poznavanje potencijalnih metoda napada. Negativno je to što su pre-jednostavne da bi spriječile stvaranje novih neprijateljskih primjera te ne povećavaju robustnos mreže. Općenito, obrane koje su "agnostične" što se tiče modela kojeg brane, odnosno nezavisne su od modela, su u pravilu neuspješne.
 \subsection{JPEG kompresija}
+JPEG kompresija u obliku obrane od neprijateljskih primjera se pojavila više puta u različitim oblicima\citep{jpeg1}\citep{jpeg2}\citep{jpeg3}, a slijedi opis najjednostavnijeg načina zaštite. \\
+JPEG je vrsta sažimanja podataka s gubitkom (eng. \textit{lossy}) za slike. Upravo to svojstvo je poželjno pri uništavanju neprijateljske perturbacije. Pretpostavka je da su i sami neprijateljski primjeri osjetljivi na perturbacije, odnosno da će male promjene nad pažljivo-konstruiranom perturbacijom vratiti sliku nazad u domenu ispravne klasifikacije. Ovo dodatno ima smisla kada se uzme u obzir da su neprijateljski primjeri rijetki, to jest da ih nije moguće lako nasumično pronaći. \\
+JPEG kompresija bazira se na diskretnoj kosinusnoj transformaciji (eng. \textit{discrete cosine transform}, DCT). Transformacijom iz prostorne domene u frekvencijsku domenu omogućava se direktna manipulacija frekvencijskom domenom. Ljudski vid nije toliko osjetljiv na komponente visoke frekvencije u slikama, stoga se provodi kvantizacija frekvencija i visoke frekvencije se čuvaju s manjom preciznošću nego niske frekvencije. Preciznost pri kojoj se čuvaju visoke frekvenciji ovisi o faktoru kvalitete koji je u rasponu od $0$ do $100$: za $0$ se visoke frekvencije potpuno odbacuju, a za $100$ visoke frekvencije su maksimalno očuvane. Važno je uočiti da kvaliteta od $100$ ne znači da je kompresija bez gubitka, jer se gubitak djelomično dogodi već pri prelasku u frekvencijsku domenu. Na slici \ref{bla} se nalazi usporedba kompresije za različite kvalitete.
+\par
+Najjednostavnija verzija obrane (i prva koja se pojavila) je korištenje JPEG kompresije samo pri evaluciji. Autori su isprobali FGSM napad uz $\epsilon \in \{1, 5, 10\}$. Koraci su sljedeći:
+\begin{enumerate}[noitemsep, label=\textbullet]
+  \item izračunati neprijateljske primjere za navedene $\epsilon$
+  \item provesti JPEG kompresiju nad običnim slikama i neprijateljskim primjerima
+  \item usporediti izlaz modela za sve navedene skupove
+\end{enumerate} \\
 
-\subsection{Gaussovo zaglađivanje}
+slike i grafovi možda \\
+
+Zaključak je dakle da je jednostavna obrana temeljena na JPEG kompresiji daleko od korisnog rješenja, bar za FGM napad. Međutim DeepFool ima daleko manje peturbacije od FGSM napada, pa se isplati ponoviti i analizu za DeepFool. \\
+
+slike i grafovi možda
+
+\subsection{Gaussovo zaglađivanje / stiskanje značajki ?}
+
 \section{Neprijateljsko treniranje - FGSM}
 \section{Termometar kodiranje}
 
