@@ -195,7 +195,7 @@ Skalarni umnožak vektora težina $\boldsymbol{w}^{T}$ i primjera s perturbacijo
 \begin{equation}
 	\boldsymbol{w}^{T}\boldsymbol{\tilde{x}} = \boldsymbol{w}^{T}\boldsymbol{x} + \boldsymbol{w}^{T}\boldsymbol{\eta}
 \end{equation}
-Dakle, perturbacija $\boldsymbol{\eta}$ uzrokuje porast aktivacije za $\boldsymbol{w}^{T}\boldsymbol{\eta}$. Ovaj porast se može maksimizirati postavljanjem $\boldsymbol{\eta} = \epsilon sign(\boldsymbol{w})$. Ako je prosječna vrijednost vektora težina $m$, onda je porast iznosa $\epsilon mn$. Norma $||\boldsymbol{\eta}||_{\infty}$ ne raste s porastom dimenzionalnosti problema, dok porast aktivacije raste linearno s $n$. Dakle, za visoko dimenzionalne probleme moguće je dodati nevidljive promjene koje onda zajedno mogu drastično promijeniti izlaz.
+Dakle, perturbacija $\boldsymbol{\eta}$ uzrokuje porast aktivacije za $\boldsymbol{w}^{T}\boldsymbol{\eta}$. Ovaj porast se može maksimizirati postavljanjem $\boldsymbol{\eta} = \epsilon \text{sign}(\boldsymbol{w})$. Ako je prosječna vrijednost vektora težina $m$, onda je porast iznosa $\epsilon mn$. Norma $||\boldsymbol{\eta}||_{\infty}$ ne raste s porastom dimenzionalnosti problema, dok porast aktivacije raste linearno s $n$. Dakle, za visoko dimenzionalne probleme moguće je dodati nevidljive promjene koje onda zajedno mogu drastično promijeniti izlaz.
 \par
 Ideja je zato napasti klasifikator "gdje najviše boli". Potrebno je maksimizirati promjenu izlaza uz minimalnu promjenu svakog pojedinačnog elementa. Za nelinearne modele, ideja je identična: \\
 ako su $\boldsymbol{\theta}$ parametri modela, $\boldsymbol{x}$ ulaz, $y$ izlaz te $J(\boldsymbol{\theta}, \boldsymbol{x}, y)$ funkcija gubitka korištena za treniranje mreže, maksimalna perturbacija za koju je uvjet norme zadovoljen je:
@@ -216,11 +216,11 @@ $2016.$ godine se pojavljuje sljedeći bitan algoritam stvaranja neprijateljskih
 DeepFool je iterativni algoritam baziran na modelu bijele kutije. Kao i FGM, DeepFool iskorištava svojstvo prevelike linearnosti modela te u svakom koraku aproksimira nelinearni klasifikator na linearan način. Slijedi opis rada DeepFool algoritma na binarnom klasifikatoru. \\
 Za neki klasifikator $f$ i izlaznu, izlazna labela za neki ulaz $\boldsymbol{x}$ označena je s $\hat{k}(\boldsymbol{x})$. Minimalna perturbacija $\boldsymbol{r}$ je ona koja je dovoljna da promijeni vrijednost $\hat{k}(\boldsymbol{x})$:
 \begin{equation}
-	\Delta (\boldsymbol{x}; \hat{k}) := \mathop{min}_{\boldsymbol{r}} ||\boldsymbol{r}||_{2} \text{ uz uvjet } \hat{k}(\boldsymbol{x}+\boldsymbol{r}) \neq \hat{k}(\boldsymbol{x})
+	\Delta (\boldsymbol{x}; \hat{k}) := \mathop{\min}_{\boldsymbol{r}} ||\boldsymbol{r}||_{2} \text{ uz uvjet } \hat{k}(\boldsymbol{x}+\boldsymbol{r}) \neq \hat{k}(\boldsymbol{x})
 \end{equation}
 Minimalna perturbacija potrebna za pogrešnu klasifikaciju nekog uzorka se također naziva i robustnost $\hat{k}$ u točki $\boldsymbol{x}$. Usput se može i definirati robustnost cijelog modela:
 \begin{equation}
-	\rho_{adv}(\hat{k}) = \mathbb{E}_{\boldsymbol{x}} \frac{\Delta (\boldsymbol{x}; \hat{k})}{||\boldsymbol{x}||_{2}} 
+	\rho_{\text{adv}}(\hat{k}) = \mathbb{E}_{\boldsymbol{x}} \frac{\Delta (\boldsymbol{x}; \hat{k})}{||\boldsymbol{x}||_{2}} 
 \end{equation}
 Robustnost nekog klasifikatora definirana je kao očekivana potrebna perturbacija za stvaranje neprijateljskog primjera preko (nekog) cijelog skupa podataka. \\
 Za binarni klasifikator $f(\boldsymbol{x})$ se pretpostavlja da vrijedi $\hat{k}(\boldsymbol{x}) = sign(f(\boldsymbol{x}))$. Dodatno se definira skup $\mathscr{F} := \{\boldsymbol{x} : f(\boldsymbol{x}) = 0\}$ -- skup vektora $\boldsymbol{x}$ za koje je izlaz klasifikatora $0$. \\
@@ -268,8 +268,7 @@ Najjednostavnija verzija obrane (i prva koja se pojavila) je korištenje JPEG ko
   \item izračunati neprijateljske primjere za navedene $\epsilon$
   \item provesti JPEG kompresiju nad običnim slikama i neprijateljskim primjerima
   \item usporediti izlaz modela za sve navedene skupove
-\end{enumerate} \\
-
+\end{enumerate} 
 slike i grafovi možda \\
 
 Zaključak je dakle da je jednostavna obrana temeljena na JPEG kompresiji daleko od korisnog rješenja, bar za FGM napad. Međutim DeepFool ima daleko manje peturbacije od FGSM napada, pa se isplati ponoviti i analizu za DeepFool. \\
@@ -279,6 +278,8 @@ slike i grafovi možda
 \subsection{Gaussovo zaglađivanje / stiskanje značajki ?}
 
 \section{Neprijateljsko treniranje - FGSM}
+Neprijateljsko treniranje se kao ideja pojavila već kada i FGSM\citep{Goodfellow2015ExplainingAH}. 
+
 \section{Termometar kodiranje}
 
 \chapter{Neprijateljski primjeri II}
