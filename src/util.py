@@ -399,6 +399,14 @@ def get_some_imagenet_set():
     return x, y
 
 
+def reload_keras_model(model):
+    from tensorflow.keras.models import load_model
+    model.save('temp_model')
+    model = load_model('temp_model')
+    os.remove('temp_model')
+    return model
+
+
 if __name__ == '__main__':
     setup_cifar10_model(69)
     # preload_tensorflow()
