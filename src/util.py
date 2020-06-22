@@ -167,7 +167,7 @@ def setup_cifar10_model(epochs=EPOCH_COUNT, preload_attempt=True, save_on_preloa
         return model
 
     modelname = 'tf_cifar10_epochs%d' % epochs
-    path = './saved_models/' + modelname
+    path = ROOT_DIR + '/saved_models/' + modelname
     if FORCE_RETRAIN:
         model = _train_new_model()
         model.save(path)
@@ -408,7 +408,8 @@ def reload_keras_model(model):
 
 
 if __name__ == '__main__':
-    setup_cifar10_model(69)
+    model, probability_model, (x_train, y_train), (x_test, y_test) = setup_cifar10_model(25)
+    print(np.sum(np.argmax(model.predict(x_test), axis=1) == y_test.flatten()) / len(y_test.flatten()))
     # preload_tensorflow()
     # images = load_images('../data/personal_images', (224, 224))[1:]
     # images = images.astype(np.float32)

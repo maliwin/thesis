@@ -13,6 +13,7 @@
 \usepackage{tabularx}
 \usepackage{enumitem}
 \usepackage{mathrsfs}
+\usepackage{multirow}
 
 
 \begin{document}
@@ -78,7 +79,7 @@ Zbog svega navedenog, u nastavku rada se koristi samo \textit{Adversarial Robust
 Neke obrane i posljedično napadi će u nastavku rada biti evaluirani na \textit{CIFAR-10}\citep{?} skupu podataka. \textit{CIFAR-10} sadrži samo $10$ disjunktnih razreda, te $50000$ slika za treniranje mreže. Nužno je koristiti i ovaj skup podataka jer pojedine obrane još uvijek nije moguće skalirati na \textit{ImageNet} razinu jer vrijeme izvođenja nije razumno.
 \par
 U svrhu rada je također odabrano $16$ slika koje bi \textit{ImageNet} modeli trebali ispravno klasificirati. Popis slika i izlazi određenih modela nalaze se u dodatku\textsuperscript{\ref{dodatak}}.
-\section{Konvolucijski modeli}
+\section{Konvolucijski modeli}\label{custom_model}
 Primarna meta napada u radu je mreža \textit{ResNet V2}\citep{resnetv2}, i to verzija s 50 slojeva koja je unaprijed trenirana na \textit{ImageNet} skupu. Mreža postiže top-1 točnost od $76\%$, te top-5 točnost od $93\%$.  U početnim fazama izrade rada razmatrano je više mreža, međutim \textit{ResNet} mreža je puno brža pri evaluaciji što ubržava i olakšava evaluaciju napada i obrana. Korištenje ove mreže ne smanjuje općenitost ideja predstavljenih u radu, pošto su sve konvolucijske mreže jednako ranjive na neprijateljske napade. Lakoća provođenja neprijateljskih napada je "problem" koji sve konvolucijske mreže dijele u jednakoj mjeri, i trenutno ne postoji niti jedna takva mreža koja je sama po sebi otporna na njih. Dodatno, kôd priložen uz rad dopušta provođenje napada na sljedeće mreže: \textit{DenseNet121}, \textit{VGG16}, \textit{VGG19}, \textit{MobileNetV2} te \textit{Xception}.
 \par
 Osim \textit{ResNet} mreže, dodatno je konstruirana i jednostavna konvolucijska mreža za klasifikaciju \textit{CIFAR-10} slika. Mreža se sastoji od 11 slojeva, redom:
@@ -278,7 +279,44 @@ slike i grafovi možda
 \subsection{Gaussovo zaglađivanje / stiskanje značajki ?}
 
 \section{Neprijateljsko treniranje - FGSM}
-Neprijateljsko treniranje se kao ideja pojavila već kada i FGSM\citep{Goodfellow2015ExplainingAH}. 
+Neprijateljsko treniranje se kao ideja pojavila zajedno s FGSM napadom\citep{Goodfellow2015ExplainingAH}. Međutim, neprijateljsko treniranje je tada zamišljeno primarno kao nova metoda regularizacije modela i autori su uspoređivali neprijateljsko treniranje s drugim metodama regularizacije (npr. \textit{dropout} i \textit{pretraining}), a ne kao obranu od potencijalnih neprijateljskih napada. \\
+Neprijateljsko treniranje se fundamentalno razlikuje od dosadašnjih metoda povećanja skupa podataka (eng. \textit{data augmentation}). Standardne metode uključuju operacije kao što su rotacija, zrcaljenje, blago mijenjanje boja, brisanje dijelova slike -- no tako transformirane slike i dalje ostaju u originalnoj distribuciji podataka. Zapravo je većina operacija i odabrana upravo iz tog razloga, jer se takve slike očekuju i u skupu podataka za testiranja. No neprijateljsko treniranje trenira model na primjerima koji se nikad ne bi pojavili u skupu za treniranje -- neprijateljski primjeri se ne pojavljuju prirodno nego trebaju biti konstruirani. \par
+Najjednostavniji oblik neprijateljskog treniranja je sljedeći:
+\begin{enumerate}[noitemsep, label=\textbullet]
+  \item u svakom koraku treniranja se skup treniranja podijeli u dva skupa
+  \item jedan skup ostane netaknut
+  \item drugi skup se pretvori u neprijateljske primjere -- ovo se provodi samo za ulaze koji su ispravno klasificirani
+\end{enumerate} 
+Omjer skupova je hiperparametar. U originalnom su radu autori odabrali omjer $1:1$ koji radi dovoljno dobro, stoga je i ovdje u nastavku korišten isti omjer.
+\par
+Za model je ovdje korišten konvolucijski model opisan u \ref{custom_model}. Model treniran na običan način nakon $25$ epoha postigne točnost od $78.22\%$, a nakon 50 epoha postigne točnost od $79.80\%$. Za usporedbu, istreniran je model neprijateljskim treniranjem uz FGSM s $\epsilon = 0.1$ (slike su u rasponu $[0, 1]$, stoga je i $\epsilon$ manji nego za slike u rasponu $[0, 255]$) te model uz FGSM s $\epsilon \in \{0.05, 0.1, 0.2, 0.3\}$. U tablici \ref{adv_fgsm} se nalaze rezultati uspješnosti FGSM napada uz $\epsilon \in \{0.05, 0.1, 0.2\}$ na različito trenirane modele.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{@{}lccccc@{}}
+\toprule
+Treniranje                  & Epoha    & Čisti podatci & {\begin{tabular}[c]{@{}l@{}}FGSM \\ $\epsilon = 0.05$\end{tabular}} & {\begin{tabular}[c]{@{}l@{}}FGSM \\ $\epsilon = 0.1$\end{tabular}} & {\begin{tabular}[c]{@{}l@{}}FGSM \\ $\epsilon = 0.2$\end{tabular}} \\ \midrule
+\multirow{2}{*}{Standardno} & $25$ & $78.22\%$ & $19.89\%$ & $16.99\%$ & $16.22\%$ \\
+                            & $50$ & $79.80\%$ & $22.05\%$ & $16.85\%$ & $12.32\%$ \\ \midrule
+                            
+\multirow{2}{*}{\begin{tabular}[c]{@{}l@{}}FGSM $\epsilon = 0.1$\end{tabular}} & $25$ & $73.32\%$ & $44.33\%$ & $66.53\%$ & $23.24\%$ \\
+                            & $50$ & $74.96\%$ & $45.89\%$ & $66.14\%$ & $68.33\%$ \\ \midrule
+                            
+\multirow{2}{*}{\begin{tabular}[c]{@{}l@{}}FGSM $\epsilon = 0.2$\end{tabular}} & $25$ & $74.04\%$ & $15.22\%$ & $24.25\%$ & $69.71\%$ \\
+                            & $50$ & $75.77\%$ & $16.80\%$ & $34.47\%$ & $71.11\%$ \\ \midrule
+                            
+\multirow{2}{*}{\begin{tabular}[c]{@{}l@{}}FGSM $\epsilon = 0.3$\end{tabular}} & $25$ & $74.23\%$ & $15.02\%$ & $18.88\%$ & $56.67\%$ \\
+                            & $50$ & $77.76\%$ & $17.12\%$ & $18.30\%$ & $58.76\%$ \\ \midrule
+                            
+\multirow{2}{*}{\begin{tabular}[c]{@{}l@{}}FGSM $\epsilon\in \{0.05,$ \\ $0.1, 0.2, 0.3\}$\end{tabular}} & $25$ & $77.54\%$ & $43.98\%$ & $73.52\%$ & $30.14\%$ \\
+               & $50$ & $76.98\%$ & $66.82\%$ & $69.88\%$ & $69.87\%$\\ \bottomrule
+\end{tabular}
+\caption{Prikazana je točnost modela na čistim podatcima i uz FGSM za različite $\epsilon$. Neprijateljsko FGSM treniranje ne generalizira preko različitih epsilona, te broj epoha igra bitnu ulogu kod većeg broja napada korištenih pri treniranju.}\label{adv_fgsm}
+\end{table}
+
+Postavlja se pitanje generalizira li FGSM treniranje na druge oblike napada. U nastavku su rezultati za FGM (uz $\ell_{1}$ i $\ell_{2}$ norme) i DeepFool.  [fgm i deepfool rezultati]
+\par
+Neprijateljsko treniranje se čini kao korak u dobrom smjeru, ali ne u ovom obliku. Područje koje je potrebno pokriti je preveliko jer svakako postoji više neprijateljskih primjera nego legitimnih ulaza i jednostavno nije izvodljivo model trenirati na svim normama svakog napada. Međutim, neprijateljsko treniranje se dodatno razmatra u \ref{pgd_training} s obećavajućim rezultatima.
 
 \section{Termometar kodiranje}
 
