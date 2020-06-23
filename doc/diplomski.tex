@@ -34,8 +34,8 @@
 \section{Raspoznavanje objekata}
 Raspoznavanje objekata jedan je od ključnih problema područja računalnog vida. Pri rješavanju problema raspoznavanja objekata se na ulaz nekog sustava dovede slika nekog objekta, a na izlazu se očekuje ispravna klasifikacija u neki od predodređenih razreda. Čovjeku ovaj zadatak ne predstavlja veliki problem, no još uvijek ne postoji zadovoljavajuće rješenje problema koje bi vrijedilo za opći slučaj. Trenutno najbolja takva rješenja temelje se na konvolucijskim neuronskim mrežama. \par
 Razvoj konvolucijskih mreža počeo je osamdesetih godina prošlog stoljeća. Počelo je razvojem \textit{neocognitron}[citat?]-a--neuronske mreže inspirirane biološkim stanicama vidne kore mozga. Krajem devedesetih godina se pojavljuje konvolucijska neuronska mreža LeNet5. LeNet5 mreža je vrlo uspješno raspoznavala rukom pisane znamenke te je ova mreža bila početna točka za daljnja istraživanja drugih neuronskih mreža. [citati] \par
-\textit{ImageNet}[citat] projekt je velika baza podataka predviđena za istraživanje područja raspoznavanja objekata. S više od $14$ milijuna slika podijeljenih u $20000$ kategorija, \textit{ImageNet} skup je daleko najveći slobodno dostupni skup. Počevši od 2010.[?] godine, \textit{ImageNet} projekt organizira godišnje natjecanje, \textit{ImageNet Large Scale Visual Recognition Challenge} (ILSVRC). Veliki skok u točnosti pri raspoznavanju dogodio se 2012. godine kada je konvolucijska neuronska mreža \textit{AlexNet}[citat] postigla top-5 pogrešku od samo $15.3\%$, što je bilo $10.8\%$ manje od sljedeće mreže. To je postignuto korištenjem grafičkih procesora pri treniranju, što je potaknulo svojevrsnu revoluciju u području dubokog učenja. \par
-Do 2017. godine, većina timova u natjecanju je imala top-5 točnost veću od $95\%$. Danas se u raznim bibliotekama mogu naći unaprijed istrenirane mreže koje postižu vrlo dobre rezultate, te će se one spominjati i koristiti u nastavku rada. Neke od tih mreža su primjerice \textit{ResNet}[citat], \textit{Xception}[citat] i \textit{VGG}[citat]. Sve spomenute mreže postižu vrlo zadovoljavajuće točnosti pri ispitivanju (top-5 točnosti iznad $90\%$) i čini se da mogu dobro generalizirati. No u nastavku rada će biti pokazan oblik napada na konvolucijske mreže koji dovodi u pitanje činjenicu da današnje konvolucijske mreže dobro generaliziraju.
+\textit{ImageNet}[citat] projekt je velika baza podataka predviđena za istraživanje područja raspoznavanja objekata. S više od $14$ milijuna slika podijeljenih u $20000$ kategorija, \textit{ImageNet} skup je daleko najveći slobodno dostupni skup. Počevši od 2010. godine, \textit{ImageNet} projekt organizira godišnje natjecanje, \textit{ImageNet Large Scale Visual Recognition Challenge} (ILSVRC). Veliki skok u točnosti pri raspoznavanju dogodio se 2012. godine kada je konvolucijska neuronska mreža \textit{AlexNet}[citat] postigla top-5 pogrešku od samo $15.3\%$, što je bilo $10.8\%$ manje od sljedeće mreže. To je postignuto korištenjem grafičkih procesora pri treniranju, što je potaknulo svojevrsnu revoluciju u području dubokog učenja. \par
+Do 2017. godine, većina timova u natjecanju je imala top-5 točnost veću od $95\%$. Danas se u raznim bibliotekama mogu naći unaprijed istrenirane mreže koje postižu vrlo dobre rezultate, te će se one spominjati i koristiti u nastavku rada. Neke od tih mreža su primjerice \textit{ResNet}, \textit{Xception} i \textit{VGG}. Sve spomenute mreže postižu vrlo zadovoljavajuće točnosti pri ispitivanju (top-5 točnosti iznad $90\%$) i čini se da mogu dobro generalizirati. No u nastavku rada će biti pokazan oblik napada na konvolucijske mreže koji dovodi u pitanje činjenicu da današnje konvolucijske mreže dobro generaliziraju.
 \section{Neprijateljski primjeri}
 Krajem $2013.$ godine pojavljuje se prvi izravni "napad" na duboke neuronske mreže\citep{Szegedy2014IntriguingPO}, gdje je jedna od meta bila prethodno spomenuta uspješna mreža \textit{AlexNet}. Polazna pretpostavka je da duboki modeli, usprkos tome što dobro generaliziraju, imaju ugrađene svojevrsne \textit{slijepe pjege} koje se isplati istražiti.
 \par
@@ -71,12 +71,12 @@ Za odabir biblioteke je razmatrano nekoliko stvari: dostupnost i ekstenzivnost d
 \par
 Od navedenih biblioteka, \textit{ART} je jedina koja već sada ima implementirane neke od obrana u literaturi. \textit{Cleverhans} biblioteka ima planove za implementaciju u budućnosti, dok \textit{Foolbox} podržava samo napade.
 \par
-Zbog svega navedenog, u nastavku rada se koristi samo \textit{Adversarial Robustness Toolbox}. Dodatno, autori biblioteke su vrlo aktivni na \textit{GitHub}-u i iznimno brzo reagiraju kada se postavi pitanje ili prijavi problem. Pri izradi rada otkriveno je nekoliko \textit{bug}-ova koji su popravljeni u vrlo kratkom roku te su zahvaljujući autorima minimalno usporavali izradu rada.
+Zbog svega navedenog, u nastavku rada se koristi samo \textit{Adversarial Robustness Toolbox}. Dodatno, autori biblioteke su vrlo aktivni na \textit{GitHub}-u i iznimno brzo reagiraju kada se postavi pitanje ili prijavi problem. Pri izradi rada otkriveno je nekoliko \textit{bug}-ova koji su popravljeni u iznimno kratkom roku.
 
 \section{Skupovi podataka}
-\textit{ImageNet}\citep{?} je široko korištena baza podataka slika s preko $14$ milijuna slika raspoređenih u više od $20000$ razreda. \textit{ImageNet} je praktički postao standard za treniranje i evaluaciju rada modela pri klasifikaciji objekata. Neki od modela korišteni u radu su unaprijed trenirani na \textit{ImageNet} bazi podataka na kojima postižu iznimno visoku točnost.
+\textit{ImageNet}\citep{ILSVRC15} je široko korištena baza podataka slika s preko $14$ milijuna slika raspoređenih u više od $20000$ razreda. \textit{ImageNet} je praktički postao standard za treniranje i evaluaciju rada modela pri klasifikaciji objekata. Neki od modela korišteni u radu su unaprijed trenirani na \textit{ImageNet} bazi podataka na kojima postižu iznimno visoku točnost.
 \par
-Neke obrane i posljedično napadi će u nastavku rada biti evaluirani na \textit{CIFAR-10}\citep{?} skupu podataka. \textit{CIFAR-10} sadrži samo $10$ disjunktnih razreda, te $50000$ slika za treniranje mreže. Nužno je koristiti i ovaj skup podataka jer pojedine obrane još uvijek nije moguće skalirati na \textit{ImageNet} razinu jer vrijeme izvođenja nije razumno.
+Neke obrane i posljedično napadi će u nastavku rada biti evaluirani na \textit{CIFAR-10}\citep{cifar10} skupu podataka. \textit{CIFAR-10} sadrži samo $10$ disjunktnih razreda, te $50000$ slika za treniranje mreže. Nužno je koristiti i ovaj skup podataka jer pojedine obrane još uvijek nije moguće skalirati na \textit{ImageNet} razinu jer vrijeme izvođenja nije razumno.
 \par
 U svrhu rada je također odabrano $16$ slika koje bi \textit{ImageNet} modeli trebali ispravno klasificirati. Popis slika i izlazi određenih modela nalaze se u dodatku\textsuperscript{\ref{dodatak}}.
 \section{Konvolucijski modeli}\label{custom_model}
@@ -111,16 +111,26 @@ Ukupno mreža ima $2,168,362$ parametara koji se mogu naučiti. Na slici \ref{fi
 \section{Model prijetnje}
 Model prijetnje (eng. \textit{threat model}) je proces kojim se potencijalne prijetnje mogu nabrojati i identificirati te se mogu odrediti određene mjere kao prioritet. Neki od dijelova modela prijetnje mogu biti: frekvencija interakcije s metom napada, željena vrsta pogrešne klasifikacije, količina znanja o meti napada i specifičnost napada. Prije opisivanja navedenih aspekata modela prijetnje uvedeno je nekoliko relevantnih simbola koji se učestalo pojavljuju u literaturi i u ovom radu.
 
+\begin{table}[H]
 \textbf{Osnovni pojmovi i simboli} \\
 \begin{tabular}{ l c l }
 \textbullet \ $f(\cdot)$ & -- & model dubokog učenja \\ 
-\textbullet \ $x$, $l$ & -- & originalni ulaz te pripadajuća labela \\  
-\textbullet \ $x'$, $l'$ & -- & neprijateljski primjer i pripadajuća labela \\
+\textbullet \ $\boldsymbol{x}$, $l$ & -- & originalni ulaz te pripadajuća labela \\  
+\textbullet \ $\boldsymbol{x}'$, $l'$ & -- & neprijateljski primjer i pripadajuća labela \\
 \textbullet \ $J(\cdot)$ & -- & funkcija gubitka, u većini slučajeva gubitak unakrsne entropije \\
-\textbullet \ $||\cdot||_{p}$ & -- & p-norma, p je najčešće $0$, $2$ ili $\infty$. Dodatna korištena oznaka za norme je $\ell_{p}$.
+\textbullet \ $||\cdot||_{p}$ & -- & p-norma, p je najčešće $0$, $2$ ili $\infty$. Dodatna oznaka za norme je $\ell_{p}$.
 \end{tabular}
-\linebreak
-\linebreak
+\end{table}
+
+\begin{table}[H]
+\textbf{Norme} \\
+\begin{tabular}{ l c p{13cm} }
+\textbullet \ $\ell_{0}$ & -- & $||\boldsymbol{x}||_{0}$ predstavlja broj ne-nula elemenata vektora $\boldsymbol{x}$.\\ 
+\textbullet \ $\ell_{2}$ & -- & $||\boldsymbol{x}||_{2} := \sqrt{x_{1}^{2} + ... + x_{n}^{2}}$, odnosno Euklidska norma.\\
+\textbullet \ $\ell_{\infty}$ & -- & $||\boldsymbol{x}||_{\infty} := \max\limits_{i} |x_{i}|$. U kontekstu neprijateljskih napada ova norma predstavlja maksimalnu vrijednost perturbacije $r$. 
+\end{tabular}
+\end{table}
+
 
 \begin{table}[H]
 \textbf{Frekvencija interakcije s metom napada}
@@ -196,20 +206,22 @@ Skalarni umnožak vektora težina $\boldsymbol{w}^{T}$ i primjera s perturbacijo
 \begin{equation}
 	\boldsymbol{w}^{T}\boldsymbol{\tilde{x}} = \boldsymbol{w}^{T}\boldsymbol{x} + \boldsymbol{w}^{T}\boldsymbol{\eta}
 \end{equation}
-Dakle, perturbacija $\boldsymbol{\eta}$ uzrokuje porast aktivacije za $\boldsymbol{w}^{T}\boldsymbol{\eta}$. Ovaj porast se može maksimizirati postavljanjem $\boldsymbol{\eta} = \epsilon \text{sign}(\boldsymbol{w})$. Ako je prosječna vrijednost vektora težina $m$, onda je porast iznosa $\epsilon mn$. Norma $||\boldsymbol{\eta}||_{\infty}$ ne raste s porastom dimenzionalnosti problema, dok porast aktivacije raste linearno s $n$. Dakle, za visoko dimenzionalne probleme moguće je dodati nevidljive promjene koje onda zajedno mogu drastično promijeniti izlaz.
+Dakle, perturbacija $\boldsymbol{\eta}$ uzrokuje porast aktivacije za $\boldsymbol{w}^{T}\boldsymbol{\eta}$. Ovaj porast se može maksimizirati postavljanjem $\boldsymbol{\eta} = \epsilon \text{ sign}(\boldsymbol{w})$. Ako je prosječna vrijednost vektora težina $m$, onda je porast iznosa $\epsilon mn$. Norma $||\boldsymbol{\eta}||_{\infty}$ ne raste s porastom dimenzionalnosti problema, dok porast aktivacije raste linearno s $n$. Dakle, za visoko dimenzionalne probleme moguće je dodati nevidljive promjene koje onda zajedno mogu drastično promijeniti izlaz.
 \par
 Ideja je zato napasti klasifikator "gdje najviše boli". Potrebno je maksimizirati promjenu izlaza uz minimalnu promjenu svakog pojedinačnog elementa. Za nelinearne modele, ideja je identična: \\
 ako su $\boldsymbol{\theta}$ parametri modela, $\boldsymbol{x}$ ulaz, $y$ izlaz te $J(\boldsymbol{\theta}, \boldsymbol{x}, y)$ funkcija gubitka korištena za treniranje mreže, maksimalna perturbacija za koju je uvjet norme zadovoljen je:
 \begin{equation}
-	\boldsymbol{\eta} = \epsilon sign(\nabla_{x}J(\boldsymbol{\theta}, \boldsymbol{x}, y))
+	\boldsymbol{\eta} = \epsilon \text{ sign}(\nabla_{x}J(\boldsymbol{\theta}, \boldsymbol{x}, y))
 \end{equation}
 Ova metoda generiranja neprijateljskih primjera se zove metoda temeljena na predznaku gradijenta (eng. \textit{fast gradient sign method}). Metoda je brza jer je potreban samo jedan pristup mreži, i također je napad na bijelu kutiju.
-Činjenica da je nelinearne klasifikatore moguće napasti s istom pretpostavkom kao i linearne, te da su nelinearni modeli jednako podložni neprijateljskim napadima kao i linearni modeli dodatno dokazuje da problem nije to što su duboki modeli previše nelinearni, nego to da su previše linearni. Na sličan način se može dobiti maksimalna perturbacija pod uvjetima normi $1$ i $2$. Ne uzme se funkcija predznaka $sign$ nego je potrebno gradijent podijeliti s određenim faktorom koji osigurava da uvjet norme ostane zadovoljen. Ovako proširena skupina neprijateljskih napada se zove brza metoda temeljena na gradijentima (eng. \textit{fast gradient method}). \\
-Slijedi nekoliko primjera napada na model \textit{ResNet50}. \\
-slike \\
-uspješnost u ovisnosti o epsilonu \\
+Činjenica da je nelinearne klasifikatore moguće napasti s istom pretpostavkom kao i linearne, te da su nelinearni modeli jednako podložni neprijateljskim napadima kao i linearni modeli dodatno dokazuje da problem nije to što su duboki modeli previše nelinearni, nego to da su previše linearni. Na sličan način se može dobiti maksimalna perturbacija pod uvjetima normi $1$ i $2$. Ne uzme se funkcija predznaka $\text{sign}$ nego je potrebno gradijent podijeliti s određenim faktorom koji osigurava da uvjet norme ostane zadovoljen. Ovako proširena skupina neprijateljskih napada se zove brza metoda temeljena na gradijentima (eng. \textit{fast gradient method}). \\
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.9\textwidth,keepaspectratio]{img/results/fgm_inf_1510.png}
+\caption{FGSM napad za $\epsilon \in \{1, 5, 10\}$. Torba je predviđena kao nogometna lopta ($99.87\%$, $71.24\%$, $48.63\%)$, orao kao zmaj ($99.76\%$, $99.96\%$, $98.98\%$), i tržnica kao banana ($99.79\%$, $99.99\%$, $99.99\%$).}
+\end{figure}\label{fgsm_ex}
+Na slici \ref{fgsm_ex} se nalazi primjer FGSM napada. Već za $\epsilon > 2$ FGSM uspješno nalazi neprijateljski primjer za $14/16$ slika iz skupa podataka \ref{osobni_skup}. FGSM ne nađe neprijateljski primjer za slike \ref{ref_pi01} i \ref{ref_pi12} za razumni $\epsilon$. Dodatno je zanimljivo kako kad mreža pogriješi, greška je s vrlo visokom vjerojatnošću. \\
 transferabilnost \\
-fgm adversarial uvod 
 \section{DeepFool}
 Algoritmi FGM uspješno nalaze neprijateljske primjere iz jednog pokušaja. Očito je da bi neka iterativna metoda sigurno pronašla neprijateljske primjere s još manjim perturbacijama.
 \par
@@ -225,7 +237,7 @@ Minimalna perturbacija potrebna za pogrešnu klasifikaciju nekog uzorka se tako�
 \end{equation}
 Robustnost nekog klasifikatora definirana je kao očekivana potrebna perturbacija za stvaranje neprijateljskog primjera preko (nekog) cijelog skupa podataka. \\
 Za binarni klasifikator $f(\boldsymbol{x})$ se pretpostavlja da vrijedi $\hat{k}(\boldsymbol{x}) = sign(f(\boldsymbol{x}))$. Dodatno se definira skup $\mathscr{F} := \{\boldsymbol{x} : f(\boldsymbol{x}) = 0\}$ -- skup vektora $\boldsymbol{x}$ za koje je izlaz klasifikatora $0$. \\
-Za klasifikator oblika $f(\boldsymbol{x}) = \boldsymbol{w}^{T}\boldsymbol{x} + b$ robustnos u točki $\boldsymbol{x_{0}}$ je jednaka udaljenosti od $\boldsymbol{x_{0}}$ do hiperravnine definirane s $\mathscr{F} = \{\boldsymbol{x} : \boldsymbol{w}^{T}\boldsymbol{x}+b=0\}$. Ovo je prikazano na slici \ref{fig:hyperplane_dist}. \\
+Za klasifikator oblika $f(\boldsymbol{x}) = \boldsymbol{w}^{T}\boldsymbol{x} + b$ robustnos u točki $\boldsymbol{x_{0}}$ je jednaka udaljenosti od $\boldsymbol{x_{0}}$ do hiperravnine definirane s $\mathscr{F} = \{\boldsymbol{x} : \boldsymbol{w}^{T}\boldsymbol{x}+b=0\}$. Ovo je prikazano na slici \ref{deepfool_1d}. \\
 Prema tome, da bi se klasifikacija promijenila, potrebna je perturbacija koja će točku $\boldsymbol{x} = \boldsymbol{x}_{0} + \boldsymbol{r}$ staviti na drugu stranu hiperravnine. Minimalna takva perturbacija jednaka je ortogonalnoj projekciji $\boldsymbol{x}_{0}$ na ravninu $\mathscr{F}$. Ova projekcija može se izračunati u zatvorenom obliku:
 \begin{equation}
 	\boldsymbol{r}(\boldsymbol{x_{0}}) := - \frac{f(\boldsymbol{x_{0}})}{||\boldsymbol{w}||_{2}^{2}}\boldsymbol{w}
@@ -234,8 +246,8 @@ U generalnom slučaju za bilokakav diferencijabilni klasifikator ne može se vri
 \begin{equation}
 	\mathop{\text{arg min}}_{\boldsymbol{r}_{i}}||\boldsymbol{r}_{i}||_{2} \text{ uz uvjet } f(\boldsymbol{x}_{i}) + \nabla f(\boldsymbol{x}_{i})^{T}\boldsymbol{r}_{i} = 0
 \end{equation}
-Izraz uvjeta predstavlja tangencijalnu hiperravninu na funkciju klasifikatora. Algoritam opisan riječima bi glasio ovako: u svakom koraku algoritma radi se ortogonalna projekcija trenutne točke na tangencijalnu ravninu klasifikatora. Algoritam se ponavlja dokle god klasifikator ne pogriješi, odnosno dokle god točka ne dođe na granicu klasifikatora. Ilustracija iz rada prikana na [slika] vizualno opisuje jedan korak algoritma. \\
-Pošto se višerazredni klasifikator može promatrati kao skupina binarnih klasifikatora, algoritam je moguće poopćiti na višerazredne klasifikatore. \\
+Izraz uvjeta predstavlja tangencijalnu hiperravninu na funkciju klasifikatora. Algoritam opisan riječima bi glasio ovako: u svakom koraku algoritma radi se ortogonalna projekcija trenutne točke na tangencijalnu ravninu klasifikatora. Algoritam se ponavlja dokle god klasifikator ne pogriješi, odnosno dokle god točka ne dođe na granicu klasifikatora. Ilustracija iz rada prikana na slici \ref{deepfool_2d} vizualno opisuje jedan korak algoritma. Zanimljivo je odmah uočiti kako je često i potreban samo jedan korak algoritma. \\
+Kako se višerazredni klasifikator može promatrati kao skupina binarnih klasifikatora, algoritam je moguće poopćiti na višerazredne klasifikatore. \\
 
 \begin{figure}[H]
   \centering
@@ -245,8 +257,14 @@ Pošto se višerazredni klasifikator može promatrati kao skupina binarnih klasi
   \caption{Ilustracija rada DeepFool algoritma na binarnim klasifikatorima.}
 \end{figure}\label{fig:deepfool_illustrations}
 
-Pošto je i za rad ovog algoritma potrebo znanje o mreži, ovo je također napad na model bijele kutije. DeepFool pronalazi daleko bolje neprijateljske primjere s daleko manjim perturbacijama. Slijedi nekoliko primjera napada na ResNet50 mrežu.\\
-slike
+Pošto je i za rad ovog algoritma potrebo znanje o mreži, ovo je također napad na model bijele kutije. Za razliku od do sada opisanog FGSM napada, DeepFool pronalazi bolje neprijateljske primjere s daleko manjim perturbacijama. \par
+Što se tiče uspješnosti DeepFool napada na skup \ref{osobni_skup}, napad je $100\%$ uspješan na svim slikama. Broj iteracija potreban je također iznenađujuće nizak -- za čak sedam slika je potrebna samo jedna iteracija algoritma. Za FGSM napad su se pokazale najzahtjevnije slike \ref{ref_pi01} i \ref{ref_pi12}. Te dvije slike su u slučaju DeepFoola zahtjevale 6 i 8 iteracija. U slici \ref{deepfool_hard} se nalazi prikaz napada na te slike. 
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.9\textwidth,keepaspectratio]{img/results/deepfool_hard.png}
+\caption{Rezultati DeepFool napada za slike koje FGSM nije mogao pretvoriti u neprijateljske. U lijevom stupcu je neprijateljska slika, a u desnom je razlika između originalne i neprijateljske slike. Izlaz modela za prvu sliku je prepelica ($99.46\%$), a za drugu sliku šumski zec ($7.8\%$ -- moguće je povećati vjerojatnost uz podešavanje hiperparametara napada)}
+\end{figure}\label{deepfool_hard}
 
 
 \chapter{Obrana dubokih konvolucijskih modela I}
@@ -259,7 +277,7 @@ Do sada je predstavljeno nekoliko napada. Originalni napad temeljen na minimizac
 
 \section{Jednostavne obrane}
 U ovom dijelu je ukratko opisano nekoliko vrlo jednostavnih obrana. Dobra strana ovih obrana je što su iznimno jednostavne za implementirati i vrlo efektivne protiv već stvorenih neprijateljskih primjera, te nije potrebno nikakvo mijenjanje samog modela niti detaljno poznavanje potencijalnih metoda napada. Negativno je to što su pre-jednostavne da bi spriječile stvaranje novih neprijateljskih primjera te ne povećavaju robustnos mreže. Općenito, obrane koje su "agnostične" što se tiče modela kojeg brane, odnosno nezavisne su od modela, su u pravilu neuspješne.
-\subsection{JPEG kompresija}
+\subsection{JPEG kompresija}\label{jpeg_comp}
 JPEG kompresija u obliku obrane od neprijateljskih primjera se pojavila više puta u različitim oblicima\citep{jpeg1}\citep{jpeg2}\citep{jpeg3}, a slijedi opis najjednostavnijeg načina zaštite. \\
 JPEG je vrsta sažimanja podataka s gubitkom (eng. \textit{lossy}) za slike. Upravo to svojstvo je poželjno pri uništavanju neprijateljske perturbacije. Pretpostavka je da su i sami neprijateljski primjeri osjetljivi na perturbacije, odnosno da će male promjene nad pažljivo-konstruiranom perturbacijom vratiti sliku nazad u domenu ispravne klasifikacije. Ovo dodatno ima smisla kada se uzme u obzir da su neprijateljski primjeri rijetki, to jest da ih nije moguće lako nasumično pronaći. \\
 JPEG kompresija bazira se na diskretnoj kosinusnoj transformaciji (eng. \textit{discrete cosine transform}, DCT). Transformacijom iz prostorne domene u frekvencijsku domenu omogućava se direktna manipulacija frekvencijskom domenom. Ljudski vid nije toliko osjetljiv na komponente visoke frekvencije u slikama, stoga se provodi kvantizacija frekvencija i visoke frekvencije se čuvaju s manjom preciznošću nego niske frekvencije. Preciznost pri kojoj se čuvaju visoke frekvenciji ovisi o faktoru kvalitete koji je u rasponu od $0$ do $100$: za $0$ se visoke frekvencije potpuno odbacuju, a za $100$ visoke frekvencije su maksimalno očuvane. Važno je uočiti da kvaliteta od $100$ ne znači da je kompresija bez gubitka, jer se gubitak djelomično dogodi već pri prelasku u frekvencijsku domenu. Na slici \ref{bla} se nalazi usporedba kompresije za različite kvalitete.
@@ -270,13 +288,26 @@ Najjednostavnija verzija obrane (i prva koja se pojavila) je korištenje JPEG ko
   \item provesti JPEG kompresiju nad običnim slikama i neprijateljskim primjerima
   \item usporediti izlaz modela za sve navedene skupove
 \end{enumerate} 
-slike i grafovi možda \\
+slike i grafovi \\
 
 Zaključak je dakle da je jednostavna obrana temeljena na JPEG kompresiji daleko od korisnog rješenja, bar za FGM napad. Međutim DeepFool ima daleko manje peturbacije od FGSM napada, pa se isplati ponoviti i analizu za DeepFool. \\
 
-slike i grafovi možda
+slike i grafovi
 
-\subsection{Gaussovo zaglađivanje / stiskanje značajki ?}
+\subsection{Stiskanje značajki}
+Stiskanje značajki\citep{squeezing} (eng. \textit{feature squeezing}) je generalni pojam koji se može definirati neovisno o neprijateljskim primjerima. Prostori u kojima se nalaze značajke su često bespotrebno veliki te je ideja smanjiti stupnjeve slobode pojedinih značajki i tako "istisnuti" manje bitne značajke. JPEG kompresija\label{jpeg_comp} se isto može smatrati oblikom stiskanja značajki, no u kontekstu neprijateljskih primjera se termin odnosi na dvije metode: redukcija dubine boje slike i zaglađivanje slike. \par
+Dva najčešće korištena formata boje slika za klasifikaciju su RGB (npr. \textit{CIFAR-10}, \textit{ImageNet}) i sivi tonovi (eng. \textit{grayscale}, npr. \textit{MNIST}). Za RGB slike, svaki piksel je reprezentiran s $3 \times 8 = 24$ bita, što daje $2^{24}$ mogućih vrijednosti pojedinog piksela. Međutim, za klasifikaciju slika, nije potrebno imati toliko precizne informacije te ljudi mogu lako prepoznati što se na slici nalazi i s manjom dubinom boje. Smanjenjem broja dostupnih bitova se može pokvariti neprijateljska perturbacija i također u teoriji smanjiti prostor gdje se neprijateljski primjeri mogu nalaziti. Na slici \ref{fig:squeeze_bits} je primjer slike s različitim brojem bitova dostupnim za prikaz boje. Korišten broj bitova u originalnom radu je $4$ i $5$.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.9\textwidth,keepaspectratio]{img/other/squeeze_86421.png}
+\caption{Ista slika s različitim brojem bitova za boju. Broj bitova je redom $8$, $6$, $4$, $2$ i $1$.}
+\label{fig:squeeze_bits}
+\end{figure}
+
+Gaussovo zaglađivanje je proces pri kojemu se slika zamućuje do određene mjere. Kao i kod prethodnih metoda, zamućenje može uništititi pažljivo stvorene perturbacije. [možda zamućene slike] \par 
+
+Obje metode su poprilično neuspješne u uništavanju FGSM perturbacije jer je FGSM napad veće magnitude, dok uspješno uništava primjere drugih, jačih napada (npr. DeepFool) koji generiraju manje perturbacije. Međutim, kao što se kasnije ispostavilo\citep{bypass_squeezing}, obje obrane je vrlo lako zaobići. Potrebno je jednostavno povećati snagu pojedinih napada da bi se obrane zaobišle, a novonastala perturbacija je također nevidljiva. Postoji i jednostavno objašnjenje zašto Gaussovo zaglađivanje sigurno ne može biti uspješna obrana: zaglađivanje se provodi operacijom konvolucije, što se zapravo može promatrati kao dodatni konvolucijski sloj na ulazu mreže, a konvolucijske mreže su ionako slabe na napade. Stoga još jedan dodatni konvolucijski sloj (s fiksnim težinama) sigurno ne može puno toga napraviti da spriječi nastanak neprijateljskih primjera. Dodatno je zanimljivo i kako se zaglađivanje može koristiti i za generiranje neprijateljskih primjera: dovoljno je linijskim pretraživanjem pronaći najmanji faktor zaglađivanja za koji neka mreža pogriješi. Iznenađujuće je da za puno slika, distorcija potrebna za pogrešnu klasifikaciju nije velika. Međutim, ovo se može poboljšati tako da se pri treniranju uvedu i zamućene slike (eng. \textit{data augmentation}).
 
 \section{Neprijateljsko treniranje - FGSM}
 Neprijateljsko treniranje se kao ideja pojavila zajedno s FGSM napadom\citep{Goodfellow2015ExplainingAH}. Međutim, neprijateljsko treniranje je tada zamišljeno primarno kao nova metoda regularizacije modela i autori su uspoređivali neprijateljsko treniranje s drugim metodama regularizacije (npr. \textit{dropout} i \textit{pretraining}), a ne kao obranu od potencijalnih neprijateljskih napada. \\
@@ -316,18 +347,62 @@ Treniranje                  & Epoha    & Čisti podatci & {\begin{tabular}[c]{@{
 
 Postavlja se pitanje generalizira li FGSM treniranje na druge oblike napada. U nastavku su rezultati za FGM (uz $\ell_{1}$ i $\ell_{2}$ norme) i DeepFool.  [fgm i deepfool rezultati]
 \par
-Neprijateljsko treniranje se čini kao korak u dobrom smjeru, ali ne u ovom obliku. Područje koje je potrebno pokriti je preveliko jer svakako postoji više neprijateljskih primjera nego legitimnih ulaza i jednostavno nije izvodljivo model trenirati na svim normama svakog napada. Međutim, neprijateljsko treniranje se dodatno razmatra u \ref{pgd_training} s obećavajućim rezultatima.
+Neprijateljsko treniranje se čini kao korak u dobrom smjeru, ali ne u ovom obliku. Područje koje je potrebno pokriti je preveliko jer svakako postoji više neprijateljskih primjera nego legitimnih ulaza i jednostavno nije izvodljivo model trenirati na svim normama svakog napada. Drugi oblik neprijateljskog treniranje se dodatno razmatra u \ref{pgd_training} s obećavajućim rezultatima.
 
 \section{Termometar kodiranje}
+Termometar kodiranje (eng. \textit{thermometer encoding}) je obrana koja je direktno napala problem linearnosti dubokih modela\citep{thermometer_encoding}. Slično kao i prethodne obrane, nije potrebno puno promijeniti postojeći model, ali obrana svejedno nije besplatna kao jednostavnije obrane. \par
+Jedan način da se poveća nelinearnost bi bila mijenjanje aktivacijskih funkcija mreža, no ReLU i ostale aktivacijske funkcije se koriste s razlogom: brze su i jednostavne za optimirati. Druga metoda bi bila da se postavi vrlo nelinearna transformacija na ulaz mreže. Na drugoj metodi se temelji termometar kodiranje. \par
+Prvo je potrebno uvesti kvantizacijsku funkciju $b$. Potrebno je odabrati vrijednosti $b_{i}$ takve da vrijedi $0 < b_{1} < b_{2} < ... < b_{k} = 1$, npr. $b_{i} = \frac{i}{k}$. Za neki realni broj $\theta \in [0, 1]$ definira se funkcija $b(\theta)$ kao najmanji indeks $\alpha \in \{1, ..., k\}$ takav da je $\theta \leq b_{\alpha}$. \\
+
+Slijedi opis \textit{one-hot} kodiranja. Za neki indeks $j \in \{1, ..., k\}$, neka je $\chi(j) \in \mathbb{R}^{k}$ \textit{one-hot} vektor od $j$:
+\begin{equation}
+	\chi(j)_{l} = 
+	\begin{cases}
+      1 & \text{ako } l = j \\
+      0 & \text{inače}
+    \end{cases}     
+\end{equation}
+Diskretizacijska funkcija za neki piksel je onda:
+\begin{equation}
+	f_{\text{onehot}}(x_{i}) = \chi(b(x_{i}))
+\end{equation}
+Međutim, \textit{one-hot} kodiranje se nije pokazalo dobrom transformacijom ulaza za sprječavanje neprijateljskih primjera. Pretpostavka je da je zbog toga što se gubi svojstvo uređenosti između piksela, odnosno za svaku \textit{one-hot} reprezentaciju vrijedi:
+\begin{equation}
+	||\chi(b(x_{i}))||_{2} = ||\chi(b(x_{j}))||_{2} = 1 \text{ kada vrijedi } b(x_{i}) \neq b_(x_{j})
+\end{equation}
+Termometar kodiranje je vrlo slično \textit{one-hot} kodiranju, no ne gubi se svojstvo uređenosti. Za neki indeks $j \in \{1, ..., k\}$, neka je $\tau(j) \in \mathbb{R}^{k}$ termometar vektor od $j$ definiran kao
+\begin{equation}
+	\tau(j)_{l} = 
+	\begin{cases}
+      1 & \text{ako } l \geq j \\
+      0 & \text{inače}
+    \end{cases}     
+\end{equation}
+Diskretizacijska funkcija za neki piksel je onda:
+\begin{equation}
+	f_{\text{therm}}(x_{i}) = \tau(b(x_{i}))
+\end{equation}
+Za svaku termometar reprezentaciju vrijedi:
+\begin{equation}
+	||\tau(b(x_{i}))||_{2} < ||\tau(b(x_{j}))||_{2} = 1 \text{ kada vrijedi } b(x_{i}) \neq b_(x_{j}) \text{ i } x_{i} < x_{j}
+\end{equation}
+[primjeri za one-hot i termometar] \par
+Da bi se neka mreža mogla koristiti s termometar kodiranjem, potrebno ju je ponovno istrenirati uz transformaciju ulaza. Nakon $30$ epoha treniranja, mreža na čistim ulazima postiže točnost od $77.13\%$. U ovom obliku, mrežu nije više moguće napast uspješno s niti jednim od do sada spomenutih napada na model bijele kutije. Razlog tome je što nije moguće obaviti propagaciju unatrag kroz diskretizacijsku funkciju na ulazu. Svi napadi bijele kutije u standardnom formatu imaju uspješnost od približno $0\%$. \\
+Autori su zato osmislili dva nova iterativna napada na model bijele kutije koje evaluiraju na istreniranim modelima, te su tako pokazali uspješnost svoje obrane. Ova obrana je bila \textit{state-of-the-art} obrana u trenutku kada se pojavila krajem $2017.$ godine. Međutim, ova i mnoge slične obrane koje pokušavaju diskretizacijom povećati nelinearnost mreže dijele zajednički problem koji ubrzo dolazi na vidjelo.
 
 \chapter{Neprijateljski primjeri II}
-\section{Neučinkovitost obrana} ...
-\section{PGD} pgd\citep{Madry2017TowardsDL}
+\section{Neučinkovitost obrana}
+Obrane opisane do sada su se sve pokazale neučinkovitima. Jednostavne transformacije ulaza redovito nisu dovoljne da pokvare perturbacije, a čak i kad jesu, pokazalo se da je moguće konstruirati bolje perturbacije koje su otporne na različite transformacije kao što su JPEG kompresija, zaglađivanje i redukcija dubine boje. Neprijateljsko treniranje uz FGSM nije u mogućnosti generalizirati za različite vrijednosti $\epsilon$, iako je korak u dobrom smjeru. No obrane kao što su termometar kodiranje se pokazale posebno problematičnima, iako na prvi pogled rade izvrsno protiv svih napada. \par
+Maskiranje gradijenata je pojava kod koje model ne sadrži korisne gradijente. Za obrane koje su dizajnirane tako da (namjerno ili slučajno) maskiraju gradijente se kaže da skrivaju gradijente (eng. \textit{gradient obfuscation})\citep{obfuscated}. Nije svaki oblik maskiranja gradijenata također i skrivanje gradijenata -- npr. mreža može naučiti maskirati gradijente, kao što je slučaj kod nekih oblika neprijateljskog treniranja\citep{ensemble_training}. \par
+Oblik skrivanja gradijenata kod obrana koje: nisu diferencijabilne (kao termometar kodiranje), su numerički nestabilne, ili na bilo koji način daju neispravne gradijente naziva se \textit{razbijanje gradijenata} (eng. \textit{gradient shattering})\citep{obfuscated}. \par
+Česti problem kod velikog broja ranijih metoda obrane je također to što je njihova evaluacija bila slaba ili nepotpuna. Obrane bi često bile evaluirane na vrlo jednostavnim mrežama, jednostavnim skupovima podataka (\textit{CIFAR-10} i \textit{MNIST}), korištenjem samo najjednostavnijih napada (L-BFGS, FGSM) s nedovoljno dobrim hiperparametrima. Česti problemi evaluacije robustnosi modela su detaljnije opisani u \ref{preduvjeti}. Kao odgovor na neispravno evaluirane obrane su se pojavili jači napadi koji su korišteni za opovrgavanje uspješnosti tih obrana. U nastavku slijede dva vrlo jaka napada na model bijele kutije, te jedan zanimljivi napad na model crne kutije.
+
+\section{Projicirani gradijentni spust} pgd\citep{Madry2017TowardsDL}
 \section{Napadi \textit{Carlini and Wagner}} candw\citep{Carlini2017TowardsET}
 \section{Napad temeljen na odluci} boundary\citep{Brendel2017DecisionBasedAA}
 
 \chapter{Obrana dubokih konvolucijskih modela II}
-\section{Preduvjeti uspješnih obrana}
+\section{Preduvjeti uspješnih obrana}\label{preduvjeti}
 \section{Neprijateljsko treniranje - PGD}
 \subsection{FBF training}
 \section{Dokazivost obrane od neprijateljskih napada}

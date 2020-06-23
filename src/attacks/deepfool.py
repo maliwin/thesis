@@ -1,13 +1,12 @@
 from util import *
 
 preload_tensorflow()
-setup_logging()
 
 from art.attacks.evasion import DeepFool
 
 
 def deepfool(art_model, images, eps=1e-6, max_iter=100):
-    attack = DeepFool(art_model, epsilon=eps, max_iter=max_iter)
+    attack = DeepFool(art_model, epsilon=eps, max_iter=max_iter, nb_grads=5)
     adversarial_images = attack.generate(images)
     adversarial_predictions = art_model.predict(adversarial_images)
     return adversarial_images, adversarial_predictions
@@ -64,14 +63,18 @@ def deepfool_cifar10():
 
 
 if __name__ == '__main__':
-    # TODO: just switch to cifar10, imagenet is too slow for deepfool
+    setup_logging()
     model, art_model, images, preprocessed_images, \
-    correct_labels, preprocess_input, decode_predictions = setup_imagenet_model(classifier_activation=None)
+    correct_labels, preprocess_input, decode_predictions = setup_imagenet_model(classifier_activation=None, img_range=1)
 
-    # note:
-    images1, predictions = deepfool(art_model, images[3:5], eps=0.02, max_iter=50)
-    y_pred = np.argmax(predictions, axis=1)
-    adv, not_adv = split_correct_classification(images1, y_pred, correct_labels)
+    images = np.array([images[0], images[11]])
+    correct_labels = np.array([correct_labels[0], correct_labels[11]])
 
-    a = 5
-    # save_images_plus_arrays(adv, subdirectory='fgm/norm_inf/eps_10', name_prefix='adv')
+    for img in images:
+        adv, prediction = deepfool(art_model, np.array([img]), eps=1e-6, max_iter=50)
+        y_pred = np.argmax(prediction, axis=1)
+        print(decode_predictions(tf.nn.softmax(prediction).numpy()))
+        adv = adv[0]
+        diff = adv - img
+        diff = (diff - diff.min()) / (diff.max() - diff.min())
+        display_images([adv, diff], (1, 2))

@@ -1,7 +1,6 @@
 from util import *
 
 preload_tensorflow()
-setup_logging()
 
 from art.attacks.evasion import FastGradientMethod
 
@@ -20,11 +19,12 @@ def fgm_inf():
     correct_labels, preprocess_input, decode_predictions = setup_imagenet_model()
 
     # note: good inf norm epsilons: 1, 5, 10
-    for eps in [1, 5, 10]:
+    for eps in [2.05, 2.1, 2.2, 10, 20, 60]:
         images1, predictions = fgm(art_model, images, eps=eps)
         y_pred = np.argmax(predictions, axis=1)
         adv, not_adv = split_correct_classification(images1, y_pred, correct_labels)
-        display_images(adv, (4, 4))
+        print(decode_predictions(predictions))
+        # display_images(adv, (1, 3))
 
 
 def fgm_1():
@@ -61,4 +61,6 @@ def test_resnet_fgm_on_vgg():
 
 
 if __name__ == '__main__':
-    fgm_2()
+    setup_logging()
+    fgm_inf()
+    # fgm_2()

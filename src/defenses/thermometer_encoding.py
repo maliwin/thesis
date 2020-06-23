@@ -7,8 +7,6 @@ import tensorflow as tf
 from art.classifiers import TensorFlowV2Classifier
 from art.utils import to_categorical
 
-setup_logging()
-
 from art.attacks.evasion import DeepFool
 from art.defences.preprocessor import ThermometerEncoding
 from attacks.fgm import fgm
@@ -37,15 +35,18 @@ def thermo():
     art_model = TensorFlowV2Classifier(model, nb_classes=10, input_shape=(32, 32, 30), clip_values=(0, 1),
                                         preprocessing_defences=defence, train_step=train_step,
                                         loss_object=loss_object)
-    a, b = fgm(art_model, x_test[:200], eps=0.03)
 
-    model2, _, _, _ = setup_cifar10_model(epochs=30)
+    z = np.argmax(art_model.predict(x_test), axis=1) == y_test.flatten()
+    a, b = fgm(art_model, x_test[:10], eps=0.03)
+
+    model2, _, _, _ = setup_cifar10_model(epochs=25)
     art_model2 = TensorFlowV2Classifier(model2, nb_classes=10, input_shape=(32, 32, 3), clip_values=(0, 1),
                                         train_step=train_step, loss_object=loss_object)
-    a2, b2 = fgm(art_model2, x_test[:200], eps=0.03)
+    a2, b2 = fgm(art_model2, x_test[:10], eps=0.03)
 
     a = 5
 
 
 if __name__ == '__main__':
+    setup_logging()
     thermo()

@@ -199,7 +199,7 @@ def cifar10_class_id_to_text(class_ids):
 
 def split_correct_classification(x, y_correct, y_pred):
     # used to split up sucessful and failed adversarial attacks
-    return x[np.argwhere(y_correct != y_pred).flatten()],\
+    return x[np.argwhere(y_correct != y_pred).flatten()] ,\
            x[np.argwhere(y_correct == y_pred).flatten()]
 
 
@@ -207,11 +207,15 @@ def display_images(images, grid_shape, figsize=None, titles=None):
     if isinstance(list(images), list):
         images = np.array(images)
 
+    if len(images) == 0:
+        print('Warning: no images displayed')
+        return
+
     if np.issubdtype(images.dtype, np.floating) and images.max() > 1 + 1e-6:
         images = images / 255  # this is an ok assumption I think
 
     fig = plt.figure(figsize=figsize)
-    grid = ImageGrid(fig, 111, nrows_ncols=grid_shape, axes_pad=0.3)
+    grid = ImageGrid(fig, 111, nrows_ncols=grid_shape, axes_pad=0.06)
     if not titles:
         titles = [None, ] * len(images)
 
@@ -384,26 +388,46 @@ def setup_logging():
 
 
 def get_some_imagenet_set():
+    import torch
+    import torch.utils
+    import torch.utils.data
     import torchvision.datasets as datasets
     import torchvision.transforms as transforms
 
     val = datasets.ImageFolder(
-        ROOT_DIR + '/../data/imagenet_validation',
+        ROOT_DIR + '/../data/val',
         transforms.Compose([
             transforms.Resize(256, Image.BICUBIC),
             transforms.CenterCrop(224),
+            transforms.ToTensor()
         ]))
 
-    x = np.array([np.array(img[0]) for img in val]).astype(np.float32)
-    y = np.array(val.targets)
+    torch.manual_seed(2806)
+    x, y = next(iter(torch.utils.data.DataLoader(val, shuffle=True, batch_size=50)))
+    x, y = x.numpy() * 255, y.numpy()
+    x = np.moveaxis(x, 1, -1)
     return x, y
 
 
+def get_random_imagenet():
+    import random
+    random.seed(2806)
+    x, y = get_some_imagenet_set()
+    c = list(zip(x, y))
+    random.shuffle(c)
+    x, y = zip(*c)
+    return np.array(x), np.array(y)
+
+
+def remove_softmax(model):
+    model.layers[-1].activation = tf.keras.activations.linear
+    return reload_keras_model(model)
+
 def reload_keras_model(model):
     from tensorflow.keras.models import load_model
-    model.save('temp_model')
-    model = load_model('temp_model')
-    os.remove('temp_model')
+    model.save('./temp_model')
+    model = load_model('./temp_model')
+    os.remove('./temp_model')
     return model
 
 
