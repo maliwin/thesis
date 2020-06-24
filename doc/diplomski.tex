@@ -263,7 +263,7 @@ Pošto je i za rad ovog algoritma potrebno znanje o mreži, ovo je također napa
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.9\textwidth,keepaspectratio]{img/results/deepfool_hard.png}
-\caption{Rezultati DeepFool napada za slike koje FGSM nije mogao pretvoriti u neprijateljske. U lijevom stupcu je neprijateljska slika, a u desnom je razlika između originalne i neprijateljske slike. Izlaz modela za prvu sliku je prepelica ($99.46\%$), a za drugu sliku šumski zec ($7.8\%$ -- moguće je povećati vjerojatnost uz podešavanje hiperparametara napada)}
+\caption{Rezultati DeepFool napada za slike koje FGSM nije mogao pretvoriti u neprijateljske. U lijevom stupcu je neprijateljska slika, a u desnom je razlika između originalne i neprijateljske slike. Izlaz modela za prvu sliku je \textit{prepelica} (quail, $99.46\%$), a za drugu sliku \textit{šumski kunić} (wood rabbit, $7.8\%$ -- moguće je povećati vjerojatnost uz podešavanje hiperparametara napada)}
 \end{figure}\label{deepfool_hard}
 
 
@@ -281,6 +281,14 @@ U ovom dijelu je ukratko opisano nekoliko vrlo jednostavnih obrana. Dobra strana
 JPEG kompresija u obliku obrane od neprijateljskih primjera se pojavila više puta u različitim oblicima\citep{jpeg1}\citep{jpeg2}\citep{jpeg3}, a slijedi opis najjednostavnijeg načina zaštite. \\
 JPEG je vrsta sažimanja podataka s gubitkom (eng. \textit{lossy}) za slike. Upravo to svojstvo je poželjno pri uništavanju neprijateljske perturbacije. Pretpostavka je da su i sami neprijateljski primjeri osjetljivi na perturbacije, odnosno da će male promjene nad pažljivo-konstruiranom perturbacijom vratiti sliku nazad u domenu ispravne klasifikacije. Ovo dodatno ima smisla kada se uzme u obzir da su neprijateljski primjeri rijetki, to jest da ih nije moguće lako nasumično pronaći. \\
 JPEG kompresija bazira se na diskretnoj kosinusnoj transformaciji (eng. \textit{discrete cosine transform}, DCT). Transformacijom iz prostorne domene u frekvencijsku domenu omogućava se direktna manipulacija frekvencijskom domenom. Ljudski vid nije toliko osjetljiv na komponente visoke frekvencije u slikama, stoga se provodi kvantizacija frekvencija i visoke frekvencije se čuvaju s manjom preciznošću nego niske frekvencije. Preciznost pri kojoj se čuvaju visoke frekvenciji ovisi o faktoru kvalitete koji je u rasponu od $0$ do $100$: za $0$ se visoke frekvencije potpuno odbacuju, a za $100$ visoke frekvencije su maksimalno očuvane. Važno je uočiti da kvaliteta od $100$ ne znači da je kompresija bez gubitka, jer se gubitak djelomično dogodi već pri prelasku u frekvencijsku domenu. Na slici \ref{bla} se nalazi usporedba kompresije za različite kvalitete.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.9\textwidth,keepaspectratio]{img/other/jpeg_examples.png}
+\caption{Primjeri JPEG kompresije za različiti parametar kvalitete. Kvaliteta je redom $5$, $25$, $50$, $90$.}
+\label{fig:jpeg_examples}
+\end{figure}
+
 \par
 Najjednostavnija verzija obrane (i prva koja se pojavila) je korištenje JPEG kompresije samo pri evaluaciji. Autori su isprobali FGSM napad uz $\epsilon \in \{1, 5, 10\}$. Koraci su sljedeći:
 \begin{enumerate}[noitemsep, label=\textbullet]
@@ -288,11 +296,40 @@ Najjednostavnija verzija obrane (i prva koja se pojavila) je korištenje JPEG ko
   \item provesti JPEG kompresiju nad običnim slikama i neprijateljskim primjerima
   \item usporediti izlaz modela za sve navedene skupove
 \end{enumerate} 
-slike i grafovi \\
+Dodatno bi bilo zanimljivo vidjeti kako obrana utječe na DeepFool napad, pošto DeepFool generira puno manje perturbacije. Rezultati u tablici \ref{jpeg_defense_table} su dobiveni na 16 slika iz \ref{osobni_skup}. 
 
-Zaključak je dakle da je jednostavna obrana temeljena na JPEG kompresiji daleko od korisnog rješenja, bar za FGM napad. Međutim DeepFool ima daleko manje perturbacije od FGSM napada, pa se isplati ponoviti i analizu za DeepFool. \\
+\begin{table}[H]
+\centering
+\begin{tabular}{@{}lcl@{}}
+\toprule
+Ulaz & Kompresija & Točnost \\ \midrule
+\multirow{3}{*}{Standardno} & Bez kompresije & $100.00\%$ \\
+							& Kvaliteta $50\%$ & $100.00\%$ \\
+							& Kvaliteta $75\%$ & $100.00\%$ \\ \midrule
+							
+\multirow{3}{*}{FGSM $\epsilon = 1$} & Bez kompresije & $31.25\%$ \\
+									 & Kvaliteta $50\%$ & $68.75\%$ \\
+									 & Kvaliteta $75\%$ & $43.75\%$ \\ \midrule
 
-slike i grafovi
+\multirow{3}{*}{FGSM $\epsilon = 5$} & Bez kompresije & $18.75\%$ \\
+									 & Kvaliteta $50\%$ & $12.50\%$ \\
+									 & Kvaliteta $75\%$ & $12.50\%$ \\\midrule
+									 
+\multirow{3}{*}{FGSM $\epsilon = 10$} & Bez kompresije & $12.50\%$ \\
+									 & Kvaliteta $50\%$ & $18.75\%$ \\
+									 & Kvaliteta $75\%$ & $12.50\%$ \\\midrule
+			
+\multirow{3}{*}{DeepFool} & Bez kompresije & $0.00\%$ \\
+						  & Kvaliteta $50\%$ & $81.25\%$ \\
+						  & Kvaliteta $75\%$ & $64.50\%$ \\ \bottomrule
+
+\end{tabular}
+\caption{Utjecaj JPEG kompresije na različite neprijateljske primjere. JPEG kompresija u ovom obliku jedino može pokvariti napade male magnitude, no čak i tada nije uvijek uspješna.}\label{jpeg_defense_table}
+\end{table}
+
+Zaključak je dakle da je jednostavna obrana temeljena na JPEG kompresiji daleko od korisnog rješenja, bar za FGSM napad. U slučaju DeepFool napada, obrana je puno uspješnija, međutim i tada nije u mogućnosti dosegnuti $100\%$ točnost kao na čistim ulazima, te čak i napad s iznimno malom perturbacijom može zaobići JPEG kompresiju. Dodatno je problematično to što metoda nije u mogućnosti spriječiti nove napade, samo degradirati već postojeće neprijateljske primjere. Dapače, ponovi li se DeepFool napad uz JPEG kompresiju na ulazu, napad je opet uspješan $100\%$ vremena na ovom skupu podataka. 
+\par
+Postoje i sofisticiraniji oblici JPEG kompresije kao metode obrane\citep{jpeg2} od neprijateljskih primjera. Moguće je dodatno mrežu trenirati na slikama različite kvalitete kompresije kako bi mreža mogla uspješno klasificirati i slike lošije kvalitete (koje često imaju artifakte). Ovaj proces autori nazivaju "cijepljenjem" mreže. Također je moguće imati onoliko modela koliko i različitih kvaliteta JPEG slika i konstruirati ansambl takvih modela. Međutim, u pravilu su obrane temeljene na ansamblima jake onoliko koliko i najjača komponenta ansambla, a pošto JPEG kompresija nije jaka obrana takav ansambl bi bio jak onoliko koliko i najjači od tih modela.
 
 \subsection{Stiskanje značajki}
 Stiskanje značajki\citep{squeezing} (eng. \textit{feature squeezing}) je generalni pojam koji se može definirati neovisno o neprijateljskim primjerima. Prostori u kojima se nalaze značajke su često bespotrebno veliki te je ideja smanjiti stupnjeve slobode pojedinih značajki i tako "istisnuti" manje bitne značajke. JPEG kompresija\label{jpeg_comp} se isto može smatrati oblikom stiskanja značajki, no u kontekstu neprijateljskih primjera se termin odnosi na dvije metode: redukcija dubine boje slike i zaglađivanje slike. \par
@@ -305,9 +342,18 @@ Dva najčešće korištena formata boje slika za klasifikaciju su RGB (npr. \tex
 \label{fig:squeeze_bits}
 \end{figure}
 
-Gaussovo zaglađivanje je proces pri kojemu se slika zamućuje do određene mjere. Kao i kod prethodnih metoda, zamućenje može uništiti pažljivo stvorene perturbacije. [možda zamućene slike] \par 
+Gaussovo zaglađivanje je proces pri kojemu se slika zamućuje do određene mjere. Kao i kod prethodnih metoda, zamućenje može uništiti pažljivo stvorene perturbacije. Na slici \ref{fig:blur_example} se nalazi primjer Gaussovog zamućivanja slike. 
 
-Obje metode su poprilično neuspješne u uništavanju FGSM perturbacije jer je FGSM napad veće magnitude, dok uspješno uništava primjere drugih, jačih napada (npr. DeepFool) koji generiraju manje perturbacije. Međutim, kao što se kasnije ispostavilo\citep{bypass_squeezing}, obje obrane je vrlo lako zaobići. Potrebno je jednostavno povećati snagu pojedinih napada da bi se obrane zaobišle, a novonastala perturbacija je također nevidljiva. Postoji i jednostavno objašnjenje zašto Gaussovo zaglađivanje sigurno ne može biti uspješna obrana: zaglađivanje se provodi operacijom konvolucije, što se zapravo može promatrati kao dodatni konvolucijski sloj na ulazu mreže, a konvolucijske mreže su ionako slabe na napade. Stoga još jedan dodatni konvolucijski sloj (s fiksnim težinama) sigurno ne može puno toga napraviti da spriječi nastanak neprijateljskih primjera. Dodatno je zanimljivo i kako se zaglađivanje može koristiti i za generiranje neprijateljskih primjera: dovoljno je linijskim pretraživanjem pronaći najmanji faktor zaglađivanja za koji neka mreža pogriješi. Iznenađujuće je da za puno slika, distorzija potrebna za pogrešnu klasifikaciju nije velika. Međutim, ovo se može poboljšati tako da se pri treniranju uvedu i zamućene slike (eng. \textit{data augmentation}).
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.9\textwidth,keepaspectratio]{img/other/blur_example.png}
+\caption{Zamućenje slike uz veličine prozora $2\times2$, $3\times3$ i $4\times4$}
+\label{fig:blur_example}
+\end{figure}
+
+\par 
+
+Obje metode su poprilično neuspješne u uništavanju FGSM perturbacije jer je FGSM napad veće magnitude, dok uspješno uništava primjere drugih, jačih napada (npr. DeepFool) koji generiraju manje perturbacije. Ovo je slično kao i kod obrane uz JPEG kompresiju koja je opisana u dijelu \ref{jpeg_comp}. Međutim, kao što se kasnije ispostavilo\citep{bypass_squeezing}, obje obrane je vrlo lako zaobići. Potrebno je jednostavno povećati snagu pojedinih napada da bi se obrane zaobišle, a novonastala perturbacija je također nevidljiva. Postoji i jednostavno objašnjenje zašto Gaussovo zaglađivanje sigurno ne može biti uspješna obrana: zaglađivanje se provodi operacijom konvolucije, što se zapravo može promatrati kao dodatni konvolucijski sloj na ulazu mreže, a konvolucijske mreže su ionako slabe na napade. Stoga još jedan dodatni konvolucijski sloj (s fiksnim težinama) sigurno ne može puno toga napraviti da spriječi nastanak neprijateljskih primjera. Dodatno je zanimljivo i kako se zaglađivanje može koristiti i za generiranje neprijateljskih primjera: dovoljno je linijskim pretraživanjem pronaći najmanji faktor zaglađivanja za koji neka mreža pogriješi. Iznenađujuće je da za puno slika, distorzija potrebna za pogrešnu klasifikaciju nije velika. Međutim, ovo se može poboljšati tako da se pri treniranju uvedu i zamućene slike (eng. \textit{data augmentation}).
 
 \section{Neprijateljsko treniranje - FGSM}
 Neprijateljsko treniranje se kao ideja pojavila zajedno s FGSM napadom\citep{Goodfellow2015ExplainingAH}. Međutim, neprijateljsko treniranje je tada zamišljeno primarno kao nova metoda regularizacije modela i autori su uspoređivali neprijateljsko treniranje s drugim metodama regularizacije (npr. \textit{dropout} i \textit{pretraining}), a ne kao obranu od potencijalnih neprijateljskih napada. \\
@@ -320,7 +366,7 @@ Najjednostavniji oblik neprijateljskog treniranja je sljedeći:
 \end{enumerate} 
 Omjer skupova je hiperparametar. U originalnom su radu autori odabrali omjer $1:1$ koji radi dovoljno dobro, stoga je i ovdje u nastavku korišten isti omjer.
 \par
-Za model je ovdje korišten konvolucijski model opisan u \ref{custom_model}. Model treniran na običan način nakon $25$ epoha postigne točnost od $78.22\%$, a nakon 50 epoha postigne točnost od $79.80\%$. Za usporedbu, istreniran je model neprijateljskim treniranjem uz FGSM s $\epsilon = 0.1$ (slike su u rasponu $[0, 1]$, stoga je i $\epsilon$ manji nego za slike u rasponu $[0, 255]$) te model uz FGSM s $\epsilon \in \{0.05, 0.1, 0.2, 0.3\}$. U tablici \ref{adv_fgsm} se nalaze rezultati uspješnosti FGSM napada uz $\epsilon \in \{0.05, 0.1, 0.2\}$ na različito trenirane modele.
+Za model je ovdje korišten konvolucijski model opisan u \ref{custom_model}. Model treniran na standardan način nakon $25$ epoha postigne točnost od $78.22\%$, a nakon 50 epoha postigne točnost od $79.80\%$. Za usporedbu, istreniran je model neprijateljskim treniranjem uz FGSM s $\epsilon = 0.1$ (slike su u rasponu $[0, 1]$, stoga je i $\epsilon$ manji nego za slike u rasponu $[0, 255]$) te model uz FGSM s $\epsilon \in \{0.05, 0.1, 0.2, 0.3\}$. U tablici \ref{adv_fgsm} se nalaze rezultati uspješnosti FGSM napada uz $\epsilon \in \{0.05, 0.1, 0.2\}$ na različito trenirane modele.
 
 \begin{table}[H]
 \centering
@@ -345,9 +391,7 @@ Treniranje                  & Epoha    & Čisti podatci & {\begin{tabular}[c]{@{
 \caption{Prikazana je točnost modela na čistim podatcima i uz FGSM za različite $\epsilon$. Neprijateljsko FGSM treniranje ne generalizira preko različitih epsilona, te broj epoha igra bitnu ulogu kod većeg broja napada korištenih pri treniranju.}\label{adv_fgsm}
 \end{table}
 
-Postavlja se pitanje generalizira li FGSM treniranje na druge oblike napada. U nastavku su rezultati za FGM (uz $\ell_{1}$ i $\ell_{2}$ norme) i DeepFool.  [fgm i deepfool rezultati]
-\par
-Neprijateljsko treniranje se čini kao korak u dobrom smjeru, ali ne u ovom obliku. Područje koje je potrebno pokriti je preveliko jer svakako postoji više neprijateljskih primjera nego legitimnih ulaza i jednostavno nije izvodljivo model trenirati na svim normama svakog napada. Drugi oblik neprijateljskog treniranje se dodatno razmatra u \ref{pgd_training} s obećavajućim rezultatima.
+Neprijateljsko treniranje se čini kao korak u dobrom smjeru, ali ne u ovom obliku. Područje koje je potrebno pokriti je preveliko jer svakako postoji više neprijateljskih primjera nego legitimnih ulaza i jednostavno nije izvodljivo model trenirati na svim normama svakog napada. Bolji oblik neprijateljskog treniranja koji ipak može generalizirati nad različitim normama se dodatno razmatra u \ref{pgd_training} s obećavajućim rezultatima.
 
 \section{Termometar kodiranje}
 Termometar kodiranje (eng. \textit{thermometer encoding}) je obrana koja je direktno napala problem linearnosti dubokih modela\citep{thermometer_encoding}. Slično kao i prethodne obrane, nije potrebno puno promijeniti postojeći model, ali obrana svejedno nije besplatna kao jednostavnije obrane. \par
@@ -386,24 +430,75 @@ Za svaku termometar reprezentaciju vrijedi:
 \begin{equation}
 	||\tau(b(x_{i}))||_{2} < ||\tau(b(x_{j}))||_{2} = 1 \text{ kada vrijedi } b(x_{i}) \neq b_(x_{j}) \text{ i } x_{i} < x_{j}
 \end{equation}
-[primjeri za one-hot i termometar] \par
+
+U tablici \ref{example_encoding} je nekoliko primjera \textit{one-hot} i termometar kodiranja.
+\begin{table}[H]
+\centering
+\begin{tabular}{@{}cll@{}}
+\toprule
+Ulaz & One hot & Termometar\\ \midrule
+0.03 & [1000000000] & [1111111111] \\
+0.54 & [0000100000] & [0000111111] \\ 
+0.78 & [0000000100] & [0000000111] \\ 
+0.92 & [0000000001] & [0000000001] \\ \bottomrule
+\end{tabular}
+\caption{Primjer kodiranja za $b_{i} = \frac{i}{k}$ uz $k = 10$.}\label{example_encoding}
+\end{table}
+\par
 Da bi se neka mreža mogla koristiti s termometar kodiranjem, potrebno ju je ponovno istrenirati uz transformaciju ulaza. Nakon $30$ epoha treniranja, mreža na čistim ulazima postiže točnost od $77.13\%$. U ovom obliku, mrežu nije više moguće napast uspješno s niti jednim od do sada spomenutih napada na model bijele kutije. Razlog tome je što nije moguće obaviti propagaciju unatrag kroz diskretizacijsku funkciju na ulazu. Svi napadi bijele kutije u standardnom formatu imaju uspješnost od približno $0\%$. \\
 Autori su zato osmislili dva nova iterativna napada na model bijele kutije koje evaluiraju na istreniranim modelima, te su tako pokazali uspješnost svoje obrane. Ova obrana je bila \textit{state-of-the-art} obrana u trenutku kada se pojavila krajem $2017.$ godine. Međutim, ova i mnoge slične obrane koje pokušavaju diskretizacijom povećati nelinearnost mreže dijele zajednički problem koji ubrzo dolazi na vidjelo.
 
 \chapter{Neprijateljski primjeri II}
 \section{Neučinkovitost obrana}
-Obrane opisane do sada su se sve pokazale neučinkovitima. Jednostavne transformacije ulaza redovito nisu dovoljne da pokvare perturbacije, a čak i kad jesu, pokazalo se da je moguće konstruirati bolje perturbacije koje su otporne na različite transformacije kao što su JPEG kompresija, zaglađivanje i redukcija dubine boje. Neprijateljsko treniranje uz FGSM nije u mogućnosti generalizirati za različite vrijednosti $\epsilon$, iako je korak u dobrom smjeru. No obrane kao što su termometar kodiranje se pokazale posebno problematičnima, iako na prvi pogled rade izvrsno protiv svih napada. \par
+Obrane opisane do sada su se sve pokazale neučinkovitima. Jednostavne transformacije ulaza redovito nisu dovoljne da pokvare perturbacije, a čak i kad jesu, pokazalo se da je moguće konstruirati bolje perturbacije koje su otporne na različite transformacije kao što su JPEG kompresija, zaglađivanje i redukcija dubine boje. Neprijateljsko treniranje uz FGSM nije u mogućnosti generalizirati za različite vrijednosti $\epsilon$, iako je korak u dobrom smjeru. No obrane kao što su termometar kodiranje su se pokazale posebno problematičnima, iako na prvi pogled rade izvrsno protiv svih napada. \par
 Maskiranje gradijenata je pojava kod koje model ne sadrži korisne gradijente. Za obrane koje su dizajnirane tako da (namjerno ili slučajno) maskiraju gradijente se kaže da skrivaju gradijente (eng. \textit{gradient obfuscation})\citep{obfuscated}. Nije svaki oblik maskiranja gradijenata također i skrivanje gradijenata -- npr. mreža može naučiti maskirati gradijente, kao što je slučaj kod nekih oblika neprijateljskog treniranja\citep{ensemble_training}. \par
 Oblik skrivanja gradijenata kod obrana koje: nisu diferencijabilne (kao termometar kodiranje), su numerički nestabilne, ili na bilo koji način daju neispravne gradijente naziva se \textit{razbijanje gradijenata} (eng. \textit{gradient shattering})\citep{obfuscated}. [još teksta] \par
 Drugi česti problem kod velikog broja ranijih metoda obrane je također to što je njihova evaluacija bila slaba ili nepotpuna. Obrane bi često bile evaluirane na vrlo jednostavnim mrežama, jednostavnim skupovima podataka (\textit{CIFAR-10} i \textit{MNIST}), korištenjem samo najjednostavnijih napada (L-BFGS, FGSM) s nedovoljno dobrim hiperparametrima. Česti problemi evaluacije robusnosti modela su detaljnije opisani u \ref{preduvjeti}. Kao odgovor na neispravno evaluirane obrane su se pojavili jači napadi koji su korišteni za opovrgavanje uspješnosti tih obrana. U nastavku slijede dva vrlo jaka napada na model bijele kutije, te jedan zanimljivi napad na model crne kutije.
 
-\section{Projicirani gradijentni spust} pgd\citep{Madry2017TowardsDL}
+\section{Projicirani gradijentni spust} Projicirani gradijentni spust (eng. \textit{projected gradient descent}) se pojavio kontekstu neprijateljskog treniranja koje je detaljno opisano u \ref{pgd_adv}. Općenito, projicirani gradijentni spust je oblik gradijentnog spusta koji dodatno uzima u obzir ograničenja. Razlika je u tome što je nakon svakog pomaka po gradijentu potrebno obaviti projekciju takvu da su ograničenja zadovoljena. \par 
+FGSM napad u jednom koraku izračuna neprijateljski primjer na sljedeći način:
+\begin{equation}
+	\boldsymbol{\tilde{x}} = \boldsymbol{x} + \epsilon \text{ sign}(\nabla_{\boldsymbol{x}} J(\boldsymbol{\theta}, \boldsymbol{x}, y)) 
+\end{equation}
+FGSM se može promatrati kao jedan korak iterativnog napada:
+\begin{equation}
+	\boldsymbol{x}^{t+1} = \Pi_{\boldsymbol{x}+S} (\boldsymbol{x}^{t} + \epsilon \text{ sign}(\nabla_{\boldsymbol{x}} J(\boldsymbol{\theta}, \boldsymbol{x}, y)))
+\end{equation}
+Operator $\Pi_{\boldsymbol{x}+S}$ predstavlja projekciju na $\boldsymbol{x}+S$. Skup $S \subseteq \mathbb{R}^{d}$ je skup dopuštenih perturbacija. $\boldsymbol{x}+S$ je $\ell_{\infty}$ kugla oko $\boldsymbol{x}$ unutar koje se traže neprijateljski primjeri tako da minimiziraju funkciju $J(\boldsymbol{\theta}, \boldsymbol{x}, y)$. \par
+
+Iako jednostavan, projicirani gradijentni spust pokazuje dodatna zanimljiva svojstva (koja FGSM ne pokazuje) koja čine ovaj napad korisnim za neprijateljsko treniranje. Već nakon $10$ iteracija uz $\epsilon = 1$ uspješno bude stvoreno $14/16$ neprijateljskih primjera za skup \ref{osobni_skup}. U tablici \ref{pgd_predictions} su predviđanja mreže za tako stvorene primjere. 
+
+\begin{table}[H]
+\centering
+\begin{tabular}{@{}cll@{}}
+\toprule
+Slika & Izlaz mreže & Vjerojatnost \\ \midrule
+\ref{ref_pi01} & African grey* & $100.00\%$\\
+\ref{ref_pi02} & Soccer ball & $100.00\%$ \\ 
+\ref{ref_pi03} & Damselfly & $99.94\%$ \\ 
+\ref{ref_pi04} & Kite & $99.99\%$ \\  
+\ref{ref_pi05} & Banana & $99.99\%$ \\ 
+\ref{ref_pi06} & Orangutan & $99.99\%$ \\ 
+\ref{ref_pi07} & Pembroke & $98.08\%$ \\ 
+\ref{ref_pi08} & Shield & $99.14\%$ \\ 
+\ref{ref_pi09} & Dungeness crab & $63.76\%$ \\ 
+\ref{ref_pi10} & Space bar & $51.36\%$ \\ 
+\ref{ref_pi11} & French bulldog & $99.98\%$ \\ 
+\ref{ref_pi12} & Meerkat* & $98.92\%$ \\ 
+\ref{ref_pi13} & Welsh springer spaniel & $99.69\%$ \\ 
+\ref{ref_pi14} & Neck brace & $100.00\%$ \\ 
+\ref{ref_pi15} & Egyptian cat & $99.87\%$ \\ 
+\ref{ref_pi16} & Shower curtain & $99.99\%$ \\ \bottomrule
+\end{tabular}
+\caption{Tablica top-1 izlaza mreže za neprijateljske primjere stvorene PGD algoritmom nakon $10$ iteracija uz $\epsilon = 1$. Slike označene sa zvjezdicom (*) nisu uspješno pretvorene u neprijateljske primjere.}\label{pgd_predictions}
+\end{table}
+
 \section{Napadi \textit{Carlini and Wagner}} candw\citep{Carlini2017TowardsET}
 \section{Napad temeljen na odluci} boundary\citep{Brendel2017DecisionBasedAA}
 
 \chapter{Obrana dubokih konvolucijskih modela II}
 \section{Preduvjeti uspješnih obrana}\label{preduvjeti}
-\section{Neprijateljsko treniranje - PGD}
+\section{Neprijateljsko treniranje - PGD}\label{pgd_training}
 \subsection{FBF training}
 \section{Dokazivost obrane od neprijateljskih napada}
 \section{Budući rad}

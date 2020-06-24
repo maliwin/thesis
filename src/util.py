@@ -387,7 +387,7 @@ def setup_logging():
     logger.addHandler(handler)
 
 
-def get_some_imagenet_set():
+def get_some_imagenet_set(n=50):
     import torch
     import torch.utils
     import torch.utils.data
@@ -403,7 +403,7 @@ def get_some_imagenet_set():
         ]))
 
     torch.manual_seed(2806)
-    x, y = next(iter(torch.utils.data.DataLoader(val, shuffle=True, batch_size=50)))
+    x, y = next(iter(torch.utils.data.DataLoader(val, shuffle=True, batch_size=n)))
     x, y = x.numpy() * 255, y.numpy()
     x = np.moveaxis(x, 1, -1)
     return x, y

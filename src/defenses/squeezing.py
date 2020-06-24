@@ -27,6 +27,19 @@ def squeeze_display():
     display_images(squozen, (1, 5))
 
 
+def blur_display():
+    img = load_personal_images((224, 224))[0][4]
+    blurred = []
+    d1 = SpatialSmoothing(2)
+    d2 = SpatialSmoothing(3)
+    d3 = SpatialSmoothing(4)
+
+    for d in [d1, d2, d3]:
+        sq, _ = d(np.array([img]))
+        blurred.append(sq[0])
+    display_images(blurred, (1, 3))
+
+
 def squeeze():
     model, art_model, images, preprocessed_images,\
     correct_labels, preprocess_input, decode_predictions = setup_imagenet_model(classifier_activation=None)
@@ -68,5 +81,6 @@ def squeeze():
 
 if __name__ == '__main__':
     # squeeze_display()
-    squeeze()
+    blur_display()
+    # squeeze()
 
