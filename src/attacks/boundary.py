@@ -63,6 +63,18 @@ if __name__ == '__main__':
     model, art_model, images, preprocessed_images, \
     correct_labels, preprocess_input, decode_predictions = setup_imagenet_model()
 
-    adv_img_history, predictions = boundary_attack(art_model, images[2], images[5], iter_count=1, iter_step=10)
-    y_pred = np.argmax(predictions, axis=1)
+    # adv_img_history, predictions = boundary_attack(art_model, images[2], images[5], iter_count=1, iter_step=10)
+     #y_pred = np.argmax(predictions, axis=1)
     # display_images(adv_img_history, (2, 3))
+
+    from art.classifiers import TensorFlowV2Classifier
+    (x_train, y_train), (x_test, y_test) = tf.keras.datasets.cifar10.load_data()
+    x_train, x_test = x_train.astype(np.float32) / 255, x_test.astype(np.float32) / 255
+    y_train, y_test = y_train.flatten(), y_test.flatten()
+
+    setup_logging()
+    model_clean = tf.keras.models.load_model('../defenses/fgsm_training/epochs50_eps_05123')
+    art_model = TensorFlowV2Classifier(model_clean, nb_classes=10, input_shape=(32, 32, 3),
+                                        clip_values=(0, 1))
+    adv_img_history = boundary_attack(art_model, x_test[0], x_test[1], iter_count=5, iter_step=500, num_classes=10)
+    a = 5
