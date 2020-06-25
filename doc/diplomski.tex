@@ -14,6 +14,7 @@
 \usepackage{enumitem}
 \usepackage{mathrsfs}
 \usepackage{multirow}
+\usepackage[croatian, onelanguage]{algorithm2e}
 
 
 \begin{document}
@@ -280,7 +281,7 @@ U ovom dijelu je ukratko opisano nekoliko vrlo jednostavnih obrana. Dobra strana
 \subsection{JPEG kompresija}\label{jpeg_comp}
 JPEG kompresija u obliku obrane od neprijateljskih primjera se pojavila više puta u različitim oblicima\citep{jpeg1}\citep{jpeg2}\citep{jpeg3}, a slijedi opis najjednostavnijeg načina zaštite. \\
 JPEG je vrsta sažimanja podataka s gubitkom (eng. \textit{lossy}) za slike. Upravo to svojstvo je poželjno pri uništavanju neprijateljske perturbacije. Pretpostavka je da su i sami neprijateljski primjeri osjetljivi na perturbacije, odnosno da će male promjene nad pažljivo-konstruiranom perturbacijom vratiti sliku nazad u domenu ispravne klasifikacije. Ovo dodatno ima smisla kada se uzme u obzir da su neprijateljski primjeri rijetki, to jest da ih nije moguće lako nasumično pronaći. \\
-JPEG kompresija bazira se na diskretnoj kosinusnoj transformaciji (eng. \textit{discrete cosine transform}, DCT). Transformacijom iz prostorne domene u frekvencijsku domenu omogućava se direktna manipulacija frekvencijskom domenom. Ljudski vid nije toliko osjetljiv na komponente visoke frekvencije u slikama, stoga se provodi kvantizacija frekvencija i visoke frekvencije se čuvaju s manjom preciznošću nego niske frekvencije. Preciznost pri kojoj se čuvaju visoke frekvenciji ovisi o faktoru kvalitete koji je u rasponu od $0$ do $100$: za $0$ se visoke frekvencije potpuno odbacuju, a za $100$ visoke frekvencije su maksimalno očuvane. Važno je uočiti da kvaliteta od $100$ ne znači da je kompresija bez gubitka, jer se gubitak djelomično dogodi već pri prelasku u frekvencijsku domenu. Na slici \ref{bla} se nalazi usporedba kompresije za različite kvalitete.
+JPEG kompresija bazira se na diskretnoj kosinusnoj transformaciji (eng. \textit{discrete cosine transform}, DCT). Transformacijom iz prostorne domene u frekvencijsku domenu omogućava se direktna manipulacija frekvencijskom domenom. Ljudski vid nije toliko osjetljiv na komponente visoke frekvencije u slikama, stoga se provodi kvantizacija frekvencija i visoke frekvencije se čuvaju s manjom preciznošću nego niske frekvencije. Preciznost pri kojoj se čuvaju visoke frekvenciji ovisi o faktoru kvalitete koji je u rasponu od $0$ do $100$: za $0$ se visoke frekvencije potpuno odbacuju, a za $100$ visoke frekvencije su maksimalno očuvane. Važno je uočiti da kvaliteta od $100$ ne znači da je kompresija bez gubitka, jer se gubitak djelomično dogodi već pri prelasku u frekvencijsku domenu. Na slici \ref{fig:jpeg_examples} se nalazi usporedba kompresije za različite kvalitete.
 
 \begin{figure}[H]
 \centering
@@ -329,7 +330,7 @@ Ulaz & Kompresija & Točnost \\ \midrule
 
 Zaključak je dakle da je jednostavna obrana temeljena na JPEG kompresiji daleko od korisnog rješenja, bar za FGSM napad. U slučaju DeepFool napada, obrana je puno uspješnija, međutim i tada nije u mogućnosti dosegnuti $100\%$ točnost kao na čistim ulazima, te čak i napad s iznimno malom perturbacijom može zaobići JPEG kompresiju. Dodatno je problematično to što metoda nije u mogućnosti spriječiti nove napade, samo degradirati već postojeće neprijateljske primjere. Dapače, ponovi li se DeepFool napad uz JPEG kompresiju na ulazu, napad je opet uspješan $100\%$ vremena na ovom skupu podataka. 
 \par
-Postoje i sofisticiraniji oblici JPEG kompresije kao metode obrane\citep{jpeg2} od neprijateljskih primjera. Moguće je dodatno mrežu trenirati na slikama različite kvalitete kompresije kako bi mreža mogla uspješno klasificirati i slike lošije kvalitete (koje često imaju artifakte). Ovaj proces autori nazivaju "cijepljenjem" mreže. Također je moguće imati onoliko modela koliko i različitih kvaliteta JPEG slika i konstruirati ansambl takvih modela. Međutim, u pravilu su obrane temeljene na ansamblima jake onoliko koliko i najjača komponenta ansambla, a pošto JPEG kompresija nije jaka obrana takav ansambl bi bio jak onoliko koliko i najjači od tih modela.
+Postoje i sofisticiraniji oblici JPEG kompresije kao metode obrane\citep{jpeg2} od neprijateljskih primjera. Moguće je dodatno mrežu trenirati na slikama različite kvalitete kompresije kako bi mreža mogla uspješno klasificirati i slike lošije kvalitete (koje često imaju artifakte). Ovaj proces autori nazivaju "cijepljenjem" mreže. Također je moguće imati onoliko modela koliko i različitih kvaliteta JPEG slika i konstruirati ansambl takvih modela. Međutim, u pravilu su obrane temeljene na ansamblima jake onoliko koliko i najjača komponenta ansambla, a pošto JPEG kompresija nije jaka obrana takav ansambl isto nije vrlo jak pri obrani od neprijateljskih primjera.
 
 \subsection{Stiskanje značajki}
 Stiskanje značajki\citep{squeezing} (eng. \textit{feature squeezing}) je generalni pojam koji se može definirati neovisno o neprijateljskim primjerima. Prostori u kojima se nalaze značajke su često bespotrebno veliki te je ideja smanjiti stupnjeve slobode pojedinih značajki i tako "istisnuti" manje bitne značajke. JPEG kompresija\label{jpeg_comp} se isto može smatrati oblikom stiskanja značajki, no u kontekstu neprijateljskih primjera se termin odnosi na dvije metode: redukcija dubine boje slike i zaglađivanje slike. \par
@@ -448,6 +449,26 @@ Ulaz & One hot & Termometar\\ \midrule
 Da bi se neka mreža mogla koristiti s termometar kodiranjem, potrebno ju je ponovno istrenirati uz transformaciju ulaza. Nakon $30$ epoha treniranja, mreža na čistim ulazima postiže točnost od $77.13\%$. U ovom obliku, mrežu nije više moguće napast uspješno s niti jednim od do sada spomenutih napada na model bijele kutije. Razlog tome je što nije moguće obaviti propagaciju unatrag kroz diskretizacijsku funkciju na ulazu. Svi napadi bijele kutije u standardnom formatu imaju uspješnost od približno $0\%$. \\
 Autori su zato osmislili dva nova iterativna napada na model bijele kutije koje evaluiraju na istreniranim modelima, te su tako pokazali uspješnost svoje obrane. Ova obrana je bila \textit{state-of-the-art} obrana u trenutku kada se pojavila krajem $2017.$ godine. Međutim, ova i mnoge slične obrane koje pokušavaju diskretizacijom povećati nelinearnost mreže dijele zajednički problem koji ubrzo dolazi na vidjelo.
 
+\section{Obrambena destilacija}
+Obrambena destilacija (eng. \textit{defensive distillation}) je učinkovita obrana koja se temelji na općenitijem pojmu destilacije dubokih neuronskih mreža. Destilacija je oblik treniranja mreže koji se provodi u dva koraka. U prvom koraku se standardno trenira neka mreža, no na ulaz u \textit{softmax} se vrijednosti podijele s faktorom $T$ koji se naziva temperatura. Izlaz \textit{softmax} sloja se onda računa prema izrazu u jednadžbi \ref{softmax_t}. Temperatura $T$ igra veliku ulogu u izlazu mreže -- veća temperatura pridaje veću vjerojatnost svim izlazima, i za $T \rightarrow \infty$ vjerojatnost za sve razrede teži k $\frac{1}{N}$. \par
+Nakon treniranja prve mreže se trenira druga mreža na isti način, ali se u skupu podataka za treniranje labele zamijene s izlazom već istrenirane mreže. Stoga se \textit{one-hot} kodirane labele mijenjaju s vjerojatnostima koje je vratila prethodno istrenirana mreža. Ponovno se ponovi postupak treniranja uz temperaturu $T$. Nakon treniranja, za vrijeme testiranja, temperatura $T$ se ukloni, odosno postavi na $T = 1$. Rezultat je destilirana mreža. \par
+U originalnoj formulaciji destilacije mreže, prva mreža je kompleksnija i s većim kapacitetom, dok je druga mreža jednostavnija. Učenje jednostavnije mreže na vjerojatnostima uz temperaturu $T$ se pokazalo korisnim jer jednostavnija mreža uspije postići rezultate neke složenije mreže, a k tome je i brža pri računanju izlaza. \\
+U kontekstu obrambrene destilacije, obje mreže mogu biti iste. Temperatura je najbitniji parametar, te su autori pokazali da je dobra temperatura $T > 10$, a najbolje rezultate su postigli za $T = 100$. U tablici \ref{def_destil} su prikazani rezultati različitih FGSM napada te DeepFool napada na destilirane mreže uz temperature $T \in \{50, 100\}$, te rezultati napada na čistu mrežu. Korištena mreža je ponovno \textit{CIFAR-10} mreža opisana u \ref{custom_model}, a treniranje je trajalo $50$ epoha. Mreža trenirana uz $T = 1$ nije destilirana, tu je provedeno standardno treniranje.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{@{}lccccc@{}}
+\toprule
+Temperatura & Čisti podatci & {\begin{tabular}[c]{@{}l@{}}FGSM \\ $\epsilon = 2$\end{tabular}} & {\begin{tabular}[c]{@{}l@{}}FGSM \\ $\epsilon = 5$\end{tabular}} & {\begin{tabular}[c]{@{}l@{}}FGSM \\ $\epsilon = 10$\end{tabular}} & DeepFool \\ \midrule
+$T = 1$ & $73.23\%$ & $45.80\%$ & $32.37\%$ & $22.86\%$ & $31.20\%$ \\ \midrule
+$T = 50$& $79.27\%$ & $76.17\%$ & $74.90\%$ & $71.10\%$ & $79.00\%$ \\ \midrule
+$T = 100$ & $81.06\%$ & $79.71\%$ & $79.31\%$ & $76.91\%$ & $82.00\%$ \\ \bottomrule
+\end{tabular}
+\caption{Rezultati za obrambeno destilirane mreže. Mreža za $T = 1$ je trenirana standardno. Napadi imaju iznimno loše rezultate na ovako treniranim mrežama. DeepFool napad je testiran na samo $500$ primjera.}\label{def_destil}
+\end{table}
+
+I ova obrana se pokazala iznimno uspješnom na napade na model bijele kutije. Za razliku od termometar kodiranja, ovdje je moguće provesti propagaciju unazad, a rezultati su svejedno izvrsni. Nažalost, kao i sve ranije opisane obrane, i ova obrana ima prikrivenu manu.
+
 \chapter{Neprijateljski primjeri II}
 \section{Neučinkovitost obrana}
 Obrane opisane do sada su se sve pokazale neučinkovitima. Jednostavne transformacije ulaza redovito nisu dovoljne da pokvare perturbacije, a čak i kad jesu, pokazalo se da je moguće konstruirati bolje perturbacije koje su otporne na različite transformacije kao što su JPEG kompresija, zaglađivanje i redukcija dubine boje. Neprijateljsko treniranje uz FGSM nije u mogućnosti generalizirati za različite vrijednosti $\epsilon$, iako je korak u dobrom smjeru. No obrane kao što su termometar kodiranje su se pokazale posebno problematičnima, iako na prvi pogled rade izvrsno protiv svih napada. \par
@@ -466,7 +487,7 @@ FGSM se može promatrati kao jedan korak iterativnog napada:
 \end{equation}
 Operator $\Pi_{\boldsymbol{x}+S}$ predstavlja projekciju na $\boldsymbol{x}+S$. Skup $S \subseteq \mathbb{R}^{d}$ je skup dopuštenih perturbacija. $\boldsymbol{x}+S$ je $\ell_{\infty}$ kugla oko $\boldsymbol{x}$ unutar koje se traže neprijateljski primjeri tako da minimiziraju funkciju $J(\boldsymbol{\theta}, \boldsymbol{x}, y)$. \par
 
-Iako jednostavan, projicirani gradijentni spust pokazuje dodatna zanimljiva svojstva (koja FGSM ne pokazuje) koja čine ovaj napad korisnim za neprijateljsko treniranje. Već nakon $10$ iteracija uz $\epsilon = 1$ uspješno bude stvoreno $14/16$ neprijateljskih primjera za skup \ref{osobni_skup}. U tablici \ref{pgd_predictions} su predviđanja mreže za tako stvorene primjere. 
+Iako jednostavan, projicirani gradijentni spust je mnogo jači od FGSM i pokazuje svojstva koja ga čine boljim za neprijateljsko treniranje. Već nakon $10$ iteracija uz $\epsilon = 1$ uspješno bude stvoreno $14/16$ neprijateljskih primjera za skup \ref{osobni_skup}. U tablici \ref{pgd_predictions} su predviđanja mreže za tako stvorene primjere. 
 
 \begin{table}[H]
 \centering
@@ -494,7 +515,55 @@ Slika & Izlaz mreže & Vjerojatnost \\ \midrule
 \end{table}
 
 \section{Napadi \textit{Carlini and Wagner}} candw\citep{Carlini2017TowardsET}
-\section{Napad temeljen na odluci} boundary\citep{Brendel2017DecisionBasedAA}
+\section{Granični napad} Do sada su bili razmatrani samo napadi na model bijele kutije. Takvi napadi su jači jer mogu iskoristiti dodatno znanje o mreže da poboljšaju napad. Napadi na model crne kutije ne znaju ništa o mreži osim vrijednosti izlaza. U praksi, modeli o kojima je znanje minimalno su česti, na primjer modeli kojima se pristupa preko nekakvog web sučelja (npr. \textit{Microsoft Azure} i slični servisi). Usprkos tome, moguće je konstruirati vrlo uspješne napade.
+Jedan od napada na model crne kutije je granični napad (eng. \textit{boundary attack}). Napad je temeljen na odluci (eng. \textit{decision based attack}), odnosno zahtjeva samo labelu na izlazu mreže. Za razliku od napada temeljenog na odluci, neki napadi crne kutije očekuju i vjerojatnosti na izlazu. \par
+Napad započinje iz neke točke koja već je neprijateljska (odnosno pogrešno klasificirana) i iterativno se približava zadanom ulazu $\boldsymbol{x}$ pod uvjetom da je u svakom koraku i dalje neprijateljska. Najjednostavniji opis algoritma je dan u nastavku.
+
+\begin{center}
+\begin{algorithm}[H]
+ \KwData{ulazna slika $\boldsymbol{o}$}
+ \KwResult{neprijateljski primjer $\boldsymbol{\tilde{o}}$ }
+ inicijalizacija: $k=0$, $\boldsymbol{\tilde{o}}^{0}$ $\sim \mathcal{U}(0, 1)$ takav da je neprijateljski klasificiran\;
+ \While{$k$ < maksimalni broj koraka}{
+  odabere se nasumična perturbacija iz distribucije $\boldsymbol{\eta_{k}} \sim \mathcal{P}(\boldsymbol{\tilde{o}}^{k-1})$\;
+  \eIf{je $\boldsymbol{\tilde{o}}^{k-1} + \boldsymbol{\eta_{k}}$ neprijateljski}{
+   postavi $\boldsymbol{\tilde{o}}^{k} = \boldsymbol{\tilde{o}}^{k-1} + \boldsymbol{\eta_{k}}$\;
+   }{
+   postavi $\boldsymbol{\tilde{o}}^{k} = \boldsymbol{\tilde{o}}^{k-1}$\;
+  }
+ $k = k + 1$
+ }
+ \caption{Najjednostavniji oblik graničnog napada. Potreban je samo izlaz mreže.}\label{simple_boundary_alg}
+\end{algorithm}
+\end{center}
+\par
+Ukoliko je napad neciljani, ulazna slika može biti neki šum (pod uvjetom da je šum pogrešno klasificiran). Za ciljani napad, ulazna slika treba biti slika iz ciljanog razreda. Ključni dio algoritma je distribucija $\mathcal{P}$. Optimalna distribucija bi se u pravilu trebala razlikovati između domena problema i različitih modela, no iznenađujuće je kako je moguće uspješno konstruirati neprijateljske primjere uz jednostavnu distribuciju. Perturbacije se generiraju iz distribucije s maksimalnom entropijom uz sljedeća ograničenja:
+\begin{enumerate}
+  \item Perturbirani uzorak je i dalje u domeni, odnosno:
+  \begin{equation}\label{boundary_1_cond}
+	\boldsymbol{\tilde{o}}_{i}^{k-1} + \boldsymbol{\eta}_{i}^{k} \in [0, 255]
+	\end{equation}
+  \item Perturbacija ima relativnu veličinu od $\delta$, odnosno:
+    \begin{equation}\label{boundary_2_cond}
+	||\boldsymbol{\eta}^{k}||_{2} = \delta \cdot d(\boldsymbol{o}, \boldsymbol{\tilde{o}}^{k-1})\text{, gdje je }d(\boldsymbol{o}, \boldsymbol{\tilde{o}}) = ||\boldsymbol{o} - \boldsymbol{\tilde{o}}||_{2}^{2} \text{ -- udaljenost između }\boldsymbol{o}\text{ i } \boldsymbol{\tilde{o}}
+	\end{equation}
+	\item Perturbacija smanjuje udaljenost između ciljane slike i perturbirane slike za neki relativni iznos, odnosno:
+    \begin{equation}\label{boundary_3_cond}
+	d(\boldsymbol{o}, \boldsymbol{\tilde{o}}^{k-1}) - d(\boldsymbol{o}, \boldsymbol{\tilde{o}}^{k-1} + \boldsymbol{\eta}^{k}) = \epsilon \cdot d(\boldsymbol{o}, \boldsymbol{\tilde{o}}^{k-1})
+	\end{equation}
+\end{enumerate}
+
+Autori su priložili ilustraciju koja slikovito prikazuje rad algoritma. Ilustracija je prikazana na slici \ref{fig:boundary_intuition}.
+
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1.0\textwidth,keepaspectratio]{img/other/boundary_intuition.png}
+\caption{Na lijevoj slici je prikazan rad algoritma kroz nekoliko koraka. U svakom koraku se neprijateljski primjer približava slici, ali tako da uvijek bude izvan granice ispravne klasifikacije. Na desnoj slici je prikazan jedan korak algoritma. Prvo se napravi nasumičan korak na sferi oko originalne slike, a nakon toga se napravi korak prema originalnoj slici.}
+\label{fig:boundary_intuition}
+\end{figure}
+
+Međutim, nije lako uzorkovati tu distribuciju. Ali je moguće konstruirati jednostavniju heuristiku koja je dovoljno dobra. Prvo se uzorkuje normalna distribucija $\boldsymbol{\eta}_{i}^{k} \sim \mathcal{N}(0, 1)$ nakon čega se uzorak skalira i ograniči tako da zadovoljava \ref{boundary_1_cond} i \ref{boundary_2_cond}. U idućem koraku se radi projekcija na sferi oko $\boldsymbol{o}$ u nasumičnom smjeru, odnosno mora vrijediti $\boldsymbol{\tilde{o}}^{k-1} + \boldsymbol{\eta}^{k}) = d(\boldsymbol{o}, \boldsymbol{\tilde{o}}^{k-1})$ i ograničenje \ref{boundary_1_cond}. U zadnjem koraku se pomakne prema originalnoj slici tako da ograničenja \ref{boundary_1_cond} i \ref{boundary_3_cond} budu zadovoljena. Za visoko-dimenzionalne ulaze i dovoljno male $\delta$ i $\epsilon$, ograničenje \ref{boundary_2_cond} će biti praktički zadovoljeno.
 
 \chapter{Obrana dubokih konvolucijskih modela II}
 \section{Preduvjeti uspješnih obrana}\label{preduvjeti}

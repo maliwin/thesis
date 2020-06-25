@@ -110,6 +110,7 @@
 \renewcommand{\captionlabelfont}{\bfseries}
 \renewcommand{\captionfont}{\small}
 
+
 % 1.5 prored, 1.3 je faktor za množenje
 \linespread{1.3}
 
@@ -381,3 +382,6 @@ Koristi \noexpand\engtitle za definiranje}}
 }
 
 \endinput
+
+
+

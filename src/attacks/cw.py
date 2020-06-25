@@ -6,8 +6,8 @@ setup_logging()
 from art.attacks.evasion import CarliniLInfMethod, CarliniL2Method
 
 
-def cw_l2(art_model, images):
-    attack = CarliniL2Method(art_model, max_iter=5, learning_rate=0.5)
+def cw_l2(art_model, images, max_iter=5):
+    attack = CarliniL2Method(art_model, max_iter=max_iter, learning_rate=0.02)
     adversarial_images = attack.generate(images)
     adversarial_predictions = art_model.predict(adversarial_images)
     return adversarial_images, adversarial_predictions
