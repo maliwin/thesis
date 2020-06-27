@@ -461,7 +461,7 @@ Obrambena destilacija (eng. \textit{defensive distillation}) je učinkovita obra
 	\boldsymbol{\sigma}(\boldsymbol{x})_{i} = \frac{e^{\boldsymbol{x}_{i} / T}}{\sum_{j=1}^{K}e^{\boldsymbol{x}_{j} / T}} \text{ za } i = 1, ..., K \text{ i } \boldsymbol{x} \in \mathbb{R}^{K}
 \end{equation}
 
-Nakon treniranja prve mreže se trenira druga mreža na isti način, ali se u skupu podataka za treniranje labele zamijene s izlazom već istrenirane mreže. Stoga se \textit{one-hot} kodirane labele mijenjaju s vjerojatnostima koje je vratila prethodno istrenirana mreža. Ponovno se ponovi postupak treniranja uz temperaturu $T$. Nakon treniranja, za vrijeme testiranja, temperatura $T$ se ukloni, odosno postavi na $T = 1$. Rezultat je destilirana mreža. \par
+Nakon treniranja prve mreže se trenira druga mreža na isti način, ali se u skupu podataka za treniranje labele zamijene s izlazom već istrenirane mreže. Stoga se standardne \textit{one-hot} kodirane labele mijenjaju s vjerojatnostima koje je vratila prethodno istrenirana mreža. Ponovno se ponovi postupak treniranja uz temperaturu $T$. Nakon treniranja, za vrijeme testiranja, temperatura $T$ se ukloni, odosno postavi na $T = 1$. Rezultat je destilirana mreža. \par
 U originalnoj formulaciji destilacije mreže, prva mreža je kompleksnija i s većim kapacitetom, dok je druga mreža jednostavnija. Učenje jednostavnije mreže na vjerojatnostima uz temperaturu $T$ se pokazalo korisnim jer jednostavnija mreža uspije postići rezultate neke složenije mreže, a k tome je i brža pri računanju izlaza. \\
 U kontekstu obrambrene destilacije, obje mreže mogu biti iste. Temperatura je najbitniji parametar, te su autori pokazali da je dobra temperatura $T > 10$, a najbolje rezultate su postigli za $T = 100$. U tablici \ref{def_destil} su prikazani rezultati različitih FGSM napada te DeepFool napada na destilirane mreže uz temperature $T \in \{50, 100\}$, te rezultati napada na čistu mrežu. Korištena mreža je ponovno \textit{CIFAR-10} mreža opisana u \ref{custom_model}, a treniranje je trajalo $50$ epoha. Mreža trenirana uz $T = 1$ nije destilirana, tu je provedeno standardno treniranje.
 
@@ -470,9 +470,9 @@ U kontekstu obrambrene destilacije, obje mreže mogu biti iste. Temperatura je n
 \begin{tabular}{@{}lccccc@{}}
 \toprule
 Temperatura & Čisti podatci & {\begin{tabular}[c]{@{}l@{}}FGSM \\ $\epsilon = 2$\end{tabular}} & {\begin{tabular}[c]{@{}l@{}}FGSM \\ $\epsilon = 5$\end{tabular}} & {\begin{tabular}[c]{@{}l@{}}FGSM \\ $\epsilon = 10$\end{tabular}} & DeepFool \\ \midrule
-$T = 1$ & $73.23\%$ & $45.80\%$ & $32.37\%$ & $22.86\%$ & $31.20\%$ \\ \midrule
-$T = 50$& $79.27\%$ & $76.17\%$ & $74.90\%$ & $71.10\%$ & $79.00\%$ \\ \midrule
-$T = 100$ & $81.06\%$ & $79.71\%$ & $79.31\%$ & $76.91\%$ & $82.00\%$ \\ \bottomrule
+$T = 1$ & $78.89\%$ & $51.47\%$ & $34.87\%$ & $27.99\%$ & $16.80\%$ \\ \midrule
+$T = 50$& $78.09\%$ & $77.50\%$ & $77.46\%$ & $76.15\%$ & $77.40\%$ \\ \midrule
+$T = 100$ & $78.41\%$ & $78.15\%$ & $78.09\%$ & $77.73\%$ & $76.40\%$ \\ \bottomrule
 \end{tabular}
 \caption{Točnost za obrambeno destilirane mreže uz različite napade. Mreža za $T = 1$ je trenirana standardno. Napadi imaju iznimno loše rezultate na ovako treniranim mrežama. DeepFool napad je testiran na samo $500$ primjera.}\label{def_destil}
 \end{table}
@@ -578,7 +578,6 @@ Autori su priložili ilustraciju koja slikovito prikazuje rad algoritma. Ilustra
 
 Nije lako uzorkovati tu distribuciju, ali je moguće konstruirati jednostavniju heuristiku koja je dovoljno dobra. Prvo se uzorkuje normalna distribucija $\boldsymbol{\eta}_{i}^{k} \sim \mathcal{N}(0, 1)$ nakon čega se uzorak skalira i ograniči tako da zadovoljava ograničenja \ref{boundary_1_cond} i \ref{boundary_2_cond}. U idućem koraku se radi pomak po sferi oko $\boldsymbol{o}$ u nasumičnom smjeru, odnosno mora vrijediti $d(\boldsymbol{o}, \boldsymbol{\tilde{o}}^{k-1} + \boldsymbol{\eta}^{k}) = d(\boldsymbol{o}, \boldsymbol{\tilde{o}}^{k-1})$ i ograničenje \ref{boundary_1_cond}. U zadnjem koraku se pomakne prema originalnoj slici tako da ograničenja \ref{boundary_1_cond} i \ref{boundary_3_cond} budu zadovoljena. Za visoko-dimenzionalne ulaze i dovoljno male $\delta$ i $\epsilon$, ograničenje \ref{boundary_2_cond} će biti praktički zadovoljeno. \par
 Postavlja se pitanje što je s lokalnim minimumima. Lokalni minimumi predstavljaju problem utoliko što na višestruko pokretanje algoritma se dogodi konvergencija prema različitim minimumima, ali ti minimumi su sličnog reda veličine i ne događa se slučaj da algoritam zapne u nekom lokalnom minimumu do te mjere da se ne postigne vizualno prihvatljiv neprijateljski primjer. Na slici \ref{fig:boundary_triple} su tri primjera napada. \par
-Iz svega navedenog je moguće zaključiti da granični napad nema nedostatak
 
 \begin{figure}[H]
 \centering
@@ -586,6 +585,8 @@ Iz svega navedenog je moguće zaključiti da granični napad nema nedostatak
 \caption{Tri primjera graničnog napada na \textit{ResNet} mrežu. U prvom redu su originalne slike, u drugom redu je rezultat nakon $400$ koraka, a u trećem redu je rezultat nakon $8000$ koraka. Algoritam jako brzo nađe šumovito rješenje, a onda većinu vremena optimizira neprijateljski primjer, kao što je pokazano na slici \ref{fig:boundary_intuition}. Za svaki pojedini stupac, izlaz modela je isti.}
 \label{fig:boundary_triple}
 \end{figure}
+
+Bitno je naglasiti da ni ovako jaki napad ne dolazi besplatno. U usporedbi s napadima bijele kutije, broj evaluacija mreže je veći za nekoliko redova veličine (ukoliko je isti cilj, na primjer isti iznos norme). Za DeepFool napad, autorima je u prosjeku trebalo $7$ prolaza kroz mrežu (predikcija) i $37$ prolaza unazad (za računanje gradijenata), dok je za granični napad slične norme potrebno $1200000$ prolaza kroz mrežu i $0$ prolaza unazad (jer je napad na model crne kutije). Ovo je u slučaju da se žele iznimno dobri rezultati. Na slici \ref{fig:boundary_triple} je napad i nakon $8000$ iteracija postigao vrlo dobar rezultat, a još su k tome i slike birane tako da problem bude teži -- ciljana slika ima vrlo jednostavnu jednobojnu pozadinu i napad je svejedno iznimno uspješan. Jedino se u slučaju ljame vidi obris, no i to bi zasigurno nestalo nakon mnogo iteracija. Za $8000$ iteracija napada potrebno vrijeme izvršavanja bilo je preko $8$ sati na ove tri slike.
 
 Što se tiče svih prethodno opisanih obrana, za sve postoji napad na model bijele kutije koji ih može poraziti. Slijedi primjer ovog napada na obrane neprijateljskog treniranja (uz FGSM) i obrambenu destilaciju. Napad na obrambenu distilaciju uz $T = 100$ je na slici \ref{fig:boundary_distillation}. Napad na neprijateljski treniranu mrežu uz FGSM je na slici \ref{fig:boundary_fgsm_adv}. Napad nije primijenjen na termometar kodiranje jer nije trivijalno osigurati da je novonastali neprijateljski primjer također u formatu za termometar kodiranje, što onemogućava da se primjer dekodira. \\
 
@@ -618,8 +619,8 @@ fbf\citep{fbf}
 Konvolucijske neuronske mreže su se pokazale iznimno uspješnima pri rješavanju problema klasifikacije slika. Međutim, pojava neprijateljskih primjera dovela je u pitanje tvrdnju da današnji modeli dobro generaliziraju. Također se ispostavilo da je vrlo lako osmisliti uspješne algoritme koji mogu generirati neprijateljske primjere, a za neke napade čak nije potrebno nikakvo dodatno znanje o mreži koju se napada. Ubrzo nakon pojave neprijateljskih primjera su se pojavile i prve potencijalne obrane. Iako su sve obrane na prvi pogled izgledale obećavajuće, pokazano je da većina tih obrana također ne mogu generalizirati na jače napade. Od svih obrana do sada, gotovo niti jedna obrana nije se pokazala korisnom. Najviše obećavajuća obrana do sada temelji se na posebnom obliku treniranja mreže korištenjem neprijateljskih primjera, no to je ono što tu obranu čini skupom i neuporabljivom na većim skupovima podataka kao što je \textit{ImageNet}. Budućnost obrana od neprijateljskih primjera još uvijek nije očita. Praktički svaki dan se pojavljuju sve efikasnije metode temeljene na suparničkom treniranju, formalni postupci koji mogu dokazati robusnost mreže te potpuno nove metode obrana koje će tek biti detaljno testirane. Međutim, danas obrana dubokih konvolucijskih modela još uvijek stoji kao vrlo izazovan i neriješen problem.
 
 
-\bibliography{literatura}
 \bibliographystyle{fer}
+\bibliography{literatura}
 
 \chapter{Dodatak}\label{dodatak}
 \section{Osobni skup slika}\label{osobni_skup}
