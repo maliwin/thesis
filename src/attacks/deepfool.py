@@ -6,7 +6,7 @@ from art.attacks.evasion import DeepFool
 
 
 def deepfool(art_model, images, eps=1e-6, max_iter=100):
-    attack = DeepFool(art_model, epsilon=eps, max_iter=max_iter, nb_grads=10)
+    attack = DeepFool(art_model, epsilon=eps, max_iter=max_iter, nb_grads=10, batch_size=10)
     adversarial_images = attack.generate(images)
     adversarial_predictions = art_model.predict(adversarial_images)
     return adversarial_images, adversarial_predictions
