@@ -17,8 +17,6 @@ if __name__ == '__main__':
     model, art_model, images, preprocessed_images, \
     correct_labels, preprocess_input, decode_predictions = setup_imagenet_model()
 
-    # images = images[:1]
-    # correct_labels = correct_labels[:1]
     # note: good inf norm epsilons: 1, 5, 10
     images1, predictions = pgd(art_model, images, eps=1, max_iter=10)
     y_pred = np.argmax(predictions, axis=1)
@@ -29,4 +27,4 @@ if __name__ == '__main__':
     for a in images1:
         z = np.array([a])
         print(decode_predictions(art_model.predict(z)))
-    # print(decode_predictions(art_model.predict(not_adv)))
+    print(decode_predictions(art_model.predict(not_adv)))

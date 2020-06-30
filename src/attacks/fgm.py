@@ -82,14 +82,6 @@ def fgm_2():
             pass
 
 
-def gen_fgm_for_resnet():
-    pass
-
-
-def test_resnet_fgm_on_vgg():
-    pass
-
-
 if __name__ == '__main__':
     setup_logging()
     fgm_inf()

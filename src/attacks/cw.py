@@ -5,11 +5,12 @@ preload_tensorflow()
 from art.attacks.evasion import CarliniLInfMethod, CarliniL2Method
 
 
-def cw_l2(art_model, images, max_iter=5, confidence=0.0, target=None):
+def cw_l2(art_model, images, max_iter=5, confidence=0.0, target=None, learning_rate=0.02, initial_const=0.01):
     targeted = False
     if target:
         targeted = True
-    attack = CarliniL2Method(art_model, max_iter=max_iter, learning_rate=0.02, confidence=confidence, targeted=targeted)
+    attack = CarliniL2Method(art_model, max_iter=max_iter, learning_rate=learning_rate,
+                             confidence=confidence, targeted=targeted, initial_const=initial_const, binary_search_steps=10)
     adversarial_images = attack.generate(images, y=target)
     adversarial_predictions = art_model.predict(adversarial_images)
     return adversarial_images, adversarial_predictions
@@ -40,23 +41,22 @@ if __name__ == '__main__':
     correct_labels, preprocess_input, decode_predictions = setup_imagenet_model(classifier_activation=None)
 
     _, art_model2, _, _, _, _, _ = setup_imagenet_model()  # just to get prob model
-    images = np.array([images[6], images[7], images[9], images[10]])  # good mix of images
+    # images = np.array([images[6], images[7], images[9], images[10]])  # good mix of images
 
     advs1 = []
     for img in images:
-        adv, _ = cw_linf(art_model, np.array([img]), confidence=4, max_iter=50, target=np.array([808]), eps=6)
+        adv, _ = cw_linf(art_model, np.array([img]), max_iter=50, eps=6)
         adv = adv[0]
         advs1.append(adv)
-    diff1 = ((advs1 - images) - (advs1 - images).min())
-    diff1 = diff1 / diff1.max()
-
+    advs1 = np.array(advs1)
+    # diff1 = ((advs1 - images) - (advs1 - images).min())
+    # diff1 = diff1 / diff1.max()
 
     advs2 = []
-    # max_iters = [20, ?, 20, 20]
     for img in images:
-        adv, _ = cw_l2(art_model, np.array([img]), confidence=0, max_iter=20)
+        adv, _ = cw_l2(art_model, np.array([img]), confidence=0, max_iter=10, initial_const=0.01, learning_rate=0.2)
         adv = adv[0]
         advs2.append(adv)
-    diff2 = ((advs2 - images) - (advs2 - images).min())
-    diff2 = diff1 / diff1.max()
-    a = 5
+    advs2 = np.array(advs2)
+    # diff2 = ((advs2 - images) - (advs2 - images).min())
+    # diff2 = diff2 / diff2.max()

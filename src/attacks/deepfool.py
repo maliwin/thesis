@@ -59,7 +59,6 @@ def deepfool_cifar10():
 
     attack2 = DeepFool(art_model2)
     adversarial_images2 = attack.generate(x_test[:10])
-    a = 5
 
 
 if __name__ == '__main__':

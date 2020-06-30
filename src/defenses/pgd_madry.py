@@ -50,7 +50,6 @@ def regular_train():
     model.fit(x_train, to_categorical(y_train, 10), epochs=50,
               validation_data=(x_test, to_categorical(y_test)), callbacks=cbs)
     model.save('saved_models/keras_cifar10_small_resnet_epochs50')
-    a = 5
 
 
 def loaded():
@@ -76,7 +75,6 @@ def loaded():
     t3 = a3.generate(x_test[:100])
     a4 = CarliniL2Method(art_model1, max_iter=100)
     t4 = a4.generate(x_test[:100])
-    a = 5
 
 
 if __name__ == '__main__':

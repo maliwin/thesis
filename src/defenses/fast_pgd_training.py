@@ -35,7 +35,6 @@ def fast_pgd():
                 validation_data=(x_test[:1000], to_categorical(y_test[:1000], 10)))
     torch.save(model.state_dict(), 'saved_models/pytorch_fbf_cifar10_small_resnet_epochs20')
     b = art_model.predict(x_train)
-    a = 5
 
 
 def train_regular():

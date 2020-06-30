@@ -380,7 +380,7 @@ def azimuthal_avg(img):
 def setup_logging():
     import logging
     logger = logging.getLogger()
-    logger.setLevel(logging.INFO)
+    logger.setLevel(logging.DEBUG)
     handler = logging.StreamHandler()
     formatter = logging.Formatter("[%(levelname)s] %(message)s")
     handler.setFormatter(formatter)
@@ -464,7 +464,6 @@ if __name__ == '__main__':
     # attack = FastGradientMethod(art_model, eps=80, minimal=True)
     # adversarial_images = attack.generate(images)
     # adversarial_predictions = decode_predictions(art_model.predict(adversarial_images))
-    # a = 5
     #
     # all_pwrs_adv = []
     # for img in adversarial_images:

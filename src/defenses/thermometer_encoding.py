@@ -44,8 +44,6 @@ def thermo():
                                         train_step=train_step, loss_object=loss_object)
     a2, b2 = fgm(art_model2, x_test[:10], eps=0.03)
 
-    a = 5
-
 
 if __name__ == '__main__':
     setup_logging()
