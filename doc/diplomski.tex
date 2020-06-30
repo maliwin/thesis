@@ -616,7 +616,7 @@ $78.93\%$ & $9.60\%$ & $10.00\%$ \\ \bottomrule
 \caption{Rezultati CW napada na obrambenu destilaciju za $T = 100$. Napadi su provedeni na $500$ i $200$ primjera iz skupa podataka za testiranje.}\label{carlini_distillation}
 \end{table}
 
-Ovaj napad se pokazao iznimno uspješnim i teškim za poraziti. Zbog toga je postao standardni napad za evaluaciju obrana. Na slici \ref{fig:mnist_carlini} se nalaze napadi na \textit{MNIST} skup podataka. Arhitektura i način treniranja nisu pretjerano različiti od opisanog u potpoglavlju \ref{custom_model}, ali ovdje nije navedeno.
+Ovaj napad se pokazao iznimno uspješnim i teškim za poraziti. Zbog toga je postao standardni napad za evaluaciju obrana. Na slici \ref{fig:mnist_carlini} se nalaze napadi na \textit{MNIST} skup podataka. Arhitektura i način treniranja nisu pretjerano različiti od opisanog u potpoglavlju \ref{custom_model}.
 
 \begin{figure}[H]
   \centering
@@ -876,15 +876,35 @@ Ideja neprijateljskog treniranja pojavila se već uz FGSM napad\citep{Goodfellow
 U kontekstu standardnog treniranja dubokog modela, cilj je pronaći parametre mreže $\boldsymbol{\theta} \in \mathbb{R}^{p}$ takve da se minimizira očekivana vrijednost funkcije gubitka: $\mathbb{E}_{(\boldsymbol{x}, y) \sim \mathcal{D}} [J(\boldsymbol{x}, y, \boldsymbol{\theta})]$. Funkcija $J(\cdot)$ je najčešće gubitak unakrsne entropije, a $\mathcal{D}$ predstavlja distribuciju podataka. U ovu definiciju je moguće direktno ugraditi optimizacijski problem neprijateljskih primjera. Za svaki uzorak $\boldsymbol{x}$ definira se skup dopuštenih perturbacija $\mathcal{S} \subseteq \mathbb{R}^{d}$, na primjer $\ell_{\infty}$ kugla oko uzorka. Umjesto da se izravno minimizira gubitak na podatcima iz $\mathcal{D}$, prvo se dopusti ``neprijatelju'' da maksimizira gubitak tako da se konstruiraju neprijateljski primjeri. Optimizacijski problem onda poprima drugi oblik:
 
 \begin{equation}
-\underset{\boldsymbol{\theta}}{\min}\rho(\boldsymbol{\theta}) \text{ gdje je } \rho  (\boldsymbol{\theta}) = \mathbb{E}_{(\boldsymbol{x}, y) \sim \mathcal{D}}[\underset{\boldsymbol{r} \in \mathcal{S}}{\max\text{ }} J(\boldsymbol{x} + \boldsymbol{r}, y, \boldsymbol{\theta})]
+\underset{\boldsymbol{\theta}}{\min}\text{ }\rho(\boldsymbol{\theta}) \text{ gdje je } \rho  (\boldsymbol{\theta}) = \mathbb{E}_{(\boldsymbol{x}, y) \sim \mathcal{D}}[\underset{\boldsymbol{r} \in \mathcal{S}}{\max\text{ }} J(\boldsymbol{x} + \boldsymbol{r}, y, \boldsymbol{\theta})]
 \end{equation}
 
-Optimizacijski problemi ovog oblika su poznati i rješenje problema se zove sedlasta točka (engl. \textit{saddle point}) ili \textit{minimax} točka. U kontekstu ranije opisanog neprijateljskog treniranja gdje su se neprijateljski primjeri stvarali s određenim omjerom (npr. $50\%$), ovdje je slučaj da se \textit{svi} primjeri pretvaraju u neprijateljske pri treniranju. \\
-Iako je optimizacija sedlaste točke poznat problem, ovdje je slučaj da su je u pravilu vanjski minimizacijski problem ne-konveksan i unutarnji maksimizacijski problem ne-konkavan što znatno otežava optimizaciju do te mjere da se ona na prvi pogled može smatrati nerješivom. Međutim, najveći doprinos ovog rada je demonstracija toga da je ovaj problem ipak rješiv u praksi. 
+Optimizacijski problemi ovog oblika su poznati i rješenje problema se zove sedlasta točka (engl. \textit{saddle point}) ili \textit{minimax} točka. U kontekstu ranije opisanog neprijateljskog treniranja gdje su se neprijateljski primjeri stvarali s određenim omjerom (npr. $50\%$), u ovom obliku treniranja se svi primjeri pretvaraju u neprijateljske pri treniranju. \\
+Iako je optimizacija sedlaste točke poznat problem, ovdje je slučaj da je vanjski minimizacijski problem vrlo ne-konveksan i unutarnji maksimizacijski problem vrlo ne-konkavan što znatno otežava optimizaciju do te mjere da se ona na prvi pogled može smatrati nerješivom. Međutim, najveći doprinos ovog rada je demonstracija toga da je ovaj problem ipak rješiv u praksi. Usprkos tome što maksimuma funkcije gubitka ima mnogo u prostoru $\boldsymbol{x} + \mathcal{S}$, njihovi iznosi su iznimno slični te autori nisu pronašli ekstreme nakon $10^{5}$ napada. Dodatno je pokazano da PGD treniranje drastično smanjuje taj maksimalni iznos što ide u prilog tome da je PGD oblik univerzalnog neprijateljskog napada. Na slici \ref{fig:pgd_histogram} su prikazani histogrami vrijednosti funkcije gubitka za $10^{5}$ različitih početnih točaka napada. 
 
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.99\textwidth,keepaspectratio]{img/other/pgd_histogram.png}
+\caption{Frekvencija vrijednosti funkcije gubitka nakon PGD napada. Napad je proveden na $5$ slika iz $10^{5}$ različitih početnih točaka. Crvenom bojom su označene vrijednosti nakon neprijateljskog treniranja uz PGD.}
+\label{fig:pgd_histogram}
+\end{figure}
 
-\subsection{\textit{Fast is better than free}}
-fbf\citep{fbf}
+Dakle, korištenjem PGD napada pokazano je da za neki $\boldsymbol{x}$ može biti generirano mnogo različitih neprijateljskih primjera, ali će svi ti neprijateljski primjeri povećati funkciju gubitka do približno iste vrijednosti. Autori su trenirali dva modela: jedan za \textit{MNIST} te jedan za \textit{CIFAR-10}. Pokazalo se da je kapacitet mreže od presudne važnosti za uspješnost neprijateljskog treniranja. Razlog tome je što je potrebno jako povećati nelinearnost granice između razreda. Ilustracija toga je na slici \ref{fig:pgd_nonlinearity}. 
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.99\textwidth,keepaspectratio]{img/other/pgd_nonlinearity.png}
+\caption{Na lijevoj slici je pokazana linearna razdvojivost između dva razreda te je granica vrlo jednostavna. Na srednjoj slici su prikazani primjeri uz njihovo $\epsilon$-okruženje. Neprijateljski primjer može biti u okruženju, a pripasti drugom razredu. To je označeno zvjezdicom. Na desnoj slici je nacrtana nelinearna granica koja razdvaja i $\epsilon$-okruženja.}
+\label{fig:pgd_nonlinearity}
+\end{figure}
+
+Autori su zato koristili široku verziju \textit{ResNet} mreže koja ima puno veći kapacitet od ``obične'' mreže. Rezidualne jedinice u ovoj širokoj mreži imaju redom broj filtera: $16$, $160$, $320$, $640$. Na ovoj mreži se može postići točnost od $95.2\%$ uz standardno treniranje. U sklopu rada je testirano neprijateljsko treniranje na standardnoj \textit{ResNet}-$18$ mreži. Nakon $30$ sati treniranja, postignuta točnost na čistim podatcima je $74.20\%$. Uspješnost neprijateljskih primjera je praktički jednaka, te nije postignuta veća robusnost modela na neprijateljske primjere što ukazuje da je veći kapacitet presudan. Za treniranje \textit{CIFAR-10} modela opisanog u radu je autorima trebalo $80$ sati. U svrhu evaluacije obrane, autori su organizirali dva ``natjecanja`` gdje je cilj bio poraziti obranu na \textit{MNIST}\footnote{\url{https://github.com/MadryLab/mnist_challenge}} i \textit{CIFAR-10}\footnote{\url{https://github.com/MadryLab/cifar10_challenge}} skupu podataka. 
+\\
+Za \textit{CIFAR-10}, najbolji rezultat napada na model crne kutije smanjio je točnost modela na $92.76\%$. Najbolji napad na model bijele kutije smanjio je točnost na $43.99\%$. Iako brojevi možda izgledaju poražavajuće, ovo je trenutno najuspješnija obrana protiv neprijateljskih napada. Bitno je podsjetiti se da neprijateljski napadi na \textit{CIFAR-10} modele mogu lako spustiti točnost do približno $0\%$.
+\\
+Za \textit{MNIST}, najbolji rezultat napada na model crne kutije smanjio je točnost modela na $63.39\%$. Najbolji napad na model bijele kutije smanjio je točnost na $88.06\%$. Ovdje je obrana iznimno uspješna.
+\par
+Iako je obrana iznimno uspješna za \textit{MNIST} i relativno uspješna za \textit{CIFAR-10} 
 \section{Dokazivost obrane od neprijateljskih napada}
 \section{Budući rad}
 

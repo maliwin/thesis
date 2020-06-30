@@ -79,7 +79,6 @@ def loaded():
     a = 5
 
 
-
 if __name__ == '__main__':
     setup_logging()
     # adversarial_pgd()
