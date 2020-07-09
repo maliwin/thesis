@@ -169,6 +169,9 @@ def transferability_eval():
     art_model = TensorFlowV2Classifier(model_final, nb_classes=10, input_shape=(32, 32, 3),
                                         clip_values=(0, 1), loss_object=loss_object)
 
+    print('Clean accuracy')
+    print(np.sum(np.argmax(art_model.predict(x_test.astype(np.float32) / 255), axis=1) == y_test.flatten()) / len(y_test.flatten()))
+
     adv = load_numpy_array('fgsm_B_2', '../attacks/transferability/')
     print('FGSM 2 from model B')
     print(np.sum(np.argmax(art_model.predict(adv), axis=1) == y_test.flatten()) / len(y_test.flatten()))
@@ -228,7 +231,7 @@ if __name__ == '__main__':
     setup_logging()
     # eval()
     # attack_carlini()
-    eval_carlini()
+    # eval_carlini()
     # carlini_on_clean()
     # train()
-    # transferability_eval()
+    transferability_eval()
